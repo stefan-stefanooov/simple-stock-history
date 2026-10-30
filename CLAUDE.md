@@ -7,6 +7,10 @@ Work is an issue tree: #2 holds the agreed design, its sub-issues are epics, and
 3. Branch from fresh `main`, deliver the leaf's checklist, open a PR whose body says `Closes #<n>`. The owner merges.
 4. If the work changes an agreed decision, say so in the PR and update #2, `GLOSSARY.md` or the ADR to match.
 
+## Commits
+
+Sign off every commit with `git commit -s`: the DCO app fails any PR containing a commit without a `Signed-off-by:` line. To repair a branch, run `git rebase --signoff origin/main` and force-push it.
+
 ## Agent skills
 
 ### Issue tracker
