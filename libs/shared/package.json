@@ -16,5 +16,7 @@
   "nx": {
     "name": "shared"
   },
-  "dependencies": {}
+  "dependencies": {
+    "zod": "^4.6.7"
+  }
 }
