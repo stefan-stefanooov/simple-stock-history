@@ -1,8 +1,25 @@
-# Nestjs specific
-/dist
-/node_modules
-/build
-/tmp
+# Build output
+dist
+build
+tmp
+out-tsc
+coverage
+test-output
+
+# Dependencies
+node_modules
+
+# Nx
+.nx/cache
+.nx/workspace-data
+.nx/polygraph
+.nx/self-healing
+.nx/migrate-runs
+
+# Vite / Vitest
+vite.config.*.timestamp*
+vitest.config.*.timestamp*
+.vitest
 
 # Logs
 logs
@@ -22,3 +39,13 @@ lerna-debug.log*
 # temp directory
 .temp
 .tmp
+
+# IDEs and editors
+/.idea
+.vscode/*
+!.vscode/extensions.json
+*.sublime-workspace
+
+# System files
+.DS_Store
+Thumbs.db
