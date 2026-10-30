@@ -1,0 +1,10 @@
+/coverage
+/.nx/cache
+/.nx/workspace-data
+/.nx/self-healing
+dist
+pnpm-lock.yaml
+
+# Hand-written docs kept as-is
+/README.md
+/CLAUDE.md
