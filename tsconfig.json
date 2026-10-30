@@ -8,6 +8,9 @@
     },
     {
       "path": "./tools/price-history-generator"
+    },
+    {
+      "path": "./apps/api"
     }
   ],
   "compilerOptions": {}
