@@ -58,9 +58,6 @@
         "dependsOn": [
           "build"
         ],
-        "readyWhen": {
-          "signal": true
-        },
         "options": {
           "buildTarget": "api:build",
           "runBuildTargetDependencies": false
