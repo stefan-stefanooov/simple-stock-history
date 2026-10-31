@@ -1,29 +1,8 @@
-import {
-  hourCount,
-  VALUES_PER_HOUR,
-  type HourSummaries,
-} from './hour-summaries.ts';
+import type { BestTradeSearch } from './best-trade-search.interface.ts';
+import type { HourSummaries } from './hour-summaries.interface.ts';
+import { hourCount, VALUES_PER_HOUR } from './hour-summaries.ts';
 import { join, NO_TRADE, summarize } from './piece.ts';
-
-/** A Trade as positions in the Price History (0 is the Data Period's first second). */
-export interface TradePositions {
-  /** Position of the Buy Point. */
-  buy: number;
-  /** Position of the Sell Point, always greater than `buy`. */
-  sell: number;
-}
-
-export interface BestTradeSearch {
-  /**
-   * The Best Trade in the Time Slice from position `first` to `last`, both
-   * included, or `null` for No Profitable Trade. A one-second Time Slice
-   * (`first === last`) has no Trade, so it returns `null`.
-   *
-   * @throws RangeError unless `first` and `last` are integers with
-   * `0 <= first <= last < prices.length`.
-   */
-  find(first: number, last: number): TradePositions | null;
-}
+import type { TradePositions } from './trade-positions.interface.ts';
 
 /**
  * Creates the Best Trade search over a Price History (prices in cents) and its

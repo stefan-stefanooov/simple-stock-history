@@ -1,5 +1,5 @@
 // Test-only helpers, excluded from the library build (tsconfig.lib.json).
-import type { TradePositions } from '../lib/best-trade-search.ts';
+import type { TradePositions } from '../lib/trade-positions.interface.ts';
 
 /**
  * Brute-force O(n²) reference: tries every Trade in the Time Slice from

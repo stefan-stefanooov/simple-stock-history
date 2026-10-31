@@ -1,3 +1,4 @@
+import type { HourSummaries } from './hour-summaries.interface.ts';
 import { summarize } from './piece.ts';
 
 /** The hour length in production: 3,600 Price Points, one per second. */
@@ -6,22 +7,6 @@ export const HOUR_LENGTH = 3600;
 /** Values per hour summary, in memory and in the summaries file. */
 export const VALUES_PER_HOUR = 4;
 const BYTES_PER_HOUR = VALUES_PER_HOUR * Int32Array.BYTES_PER_ELEMENT;
-
-/**
- * The Price History split into hours of `hourLength` Price Points (the last
- * hour may be shorter), each reduced to an hour summary. Positions count
- * Price Points from the Data Period's first second, which is position 0.
- */
-export interface HourSummaries {
-  /** Price Points per hour: 3,600 in production, a few in tests. */
-  readonly hourLength: number;
-  /**
-   * 4 values per hour, in hour order: the positions of the hour's earliest
-   * lowest price, its earliest highest price, and the Buy Point and Sell
-   * Point of its own Best Trade (−1 for both when it has No Profitable Trade).
-   */
-  readonly values: Int32Array;
-}
 
 /** Number of hours of `hourLength` Price Points needed to cover `count` Price Points. */
 export function hourCount(count: number, hourLength: number): number {
