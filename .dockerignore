@@ -1,0 +1,15 @@
+# Image builds use the repository root as context and install and build
+# everything inside the image, so leave out VCS data, local dependencies,
+# build output and anything secret.
+.git
+.github
+.claude
+.nx
+**/node_modules
+**/dist
+**/out-tsc
+**/test-output
+**/coverage
+tmp
+**/*.log
+**/.env*
