@@ -6,6 +6,7 @@
     "name": "web"
   },
   "dependencies": {
-    "@simple-stock-history/shared": "workspace:*"
+    "@simple-stock-history/shared": "workspace:*",
+    "react-day-picker": "^10.0.2"
   }
 }
