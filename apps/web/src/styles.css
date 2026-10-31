@@ -1,1 +1,19 @@
-/* You can add global styles to this file, and also import other style files */
+@import 'tailwindcss' source('.');
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+  }
+}
+
+/* react-day-picker's own CSS is unlayered and sets these on .rdp-root, so
+   this rule needs the extra specificity to win. */
+html .rdp-root {
+  --rdp-accent-color: var(--color-emerald-700);
+  --rdp-accent-background-color: var(--color-emerald-50);
+  --rdp-day-height: 2.25rem;
+  --rdp-day-width: 2.25rem;
+  --rdp-day_button-height: 2.125rem;
+  --rdp-day_button-width: 2.125rem;
+  --rdp-nav-height: 2.25rem;
+}

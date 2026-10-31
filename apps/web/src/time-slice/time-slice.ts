@@ -85,8 +85,3 @@ export function toTimeSlice(
   }
   return { ok: true, timeSlice: { from, to } };
 }
-
-/** An epoch second as `YYYY-MM-DD HH:MM:SS UTC`. */
-export function formatUtcSecond(seconds: EpochSeconds): string {
-  return `${new Date(seconds * 1000).toISOString().slice(0, 19).replace('T', ' ')} UTC`;
-}
