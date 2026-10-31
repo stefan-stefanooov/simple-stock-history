@@ -1,0 +1,11 @@
+{
+  "name": "@simple-stock-history/web",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "name": "web"
+  },
+  "dependencies": {
+    "@simple-stock-history/shared": "workspace:*"
+  }
+}
