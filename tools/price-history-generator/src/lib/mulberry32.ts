@@ -1,4 +1,4 @@
-import { assertIntegerInRange } from './assert-integer.js';
+import { assertIntegerInRange } from './assert-integer.ts';
 
 const UINT32_MAX = 0xffff_ffff;
 

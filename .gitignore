@@ -40,6 +40,9 @@ lerna-debug.log*
 .temp
 .tmp
 
+# Price History written by `nx run price-history-generator:generate` (ADR-0001)
+/data/
+
 # Claude Code agent worktrees: full checkouts that Nx would scan as projects
 /.claude/worktrees/
 

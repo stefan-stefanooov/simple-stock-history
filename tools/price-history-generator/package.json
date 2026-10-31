@@ -14,7 +14,23 @@
     "./package.json": "./package.json"
   },
   "nx": {
-    "name": "price-history-generator"
+    "name": "price-history-generator",
+    "targets": {
+      "generate": {
+        "command": "node {projectRoot}/src/main.ts --out data/acme-2025-11.bin",
+        "cache": true,
+        "inputs": [
+          "production",
+          {
+            "runtime": "node --version"
+          }
+        ],
+        "outputs": [
+          "{workspaceRoot}/data/acme-2025-11.bin",
+          "{workspaceRoot}/data/acme-2025-11.meta.json"
+        ]
+      }
+    }
   },
   "dependencies": {}
 }

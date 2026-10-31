@@ -1,5 +1,5 @@
-import { assertIntegerInRange } from './assert-integer.js';
-import { mulberry32 } from './mulberry32.js';
+import { assertIntegerInRange } from './assert-integer.ts';
+import { mulberry32 } from './mulberry32.ts';
 
 // Every value below is an integer well inside ±2^53, so each +, −, % and
 // comparison is exact and gives the same result on every engine (ADR-0001).
