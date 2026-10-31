@@ -8,5 +8,9 @@
   "dependencies": {
     "@simple-stock-history/shared": "workspace:*",
     "react-day-picker": "^10.0.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "tailwindcss": "^4.3.3"
   }
 }

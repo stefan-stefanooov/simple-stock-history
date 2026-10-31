@@ -1,128 +1,19 @@
-:root {
-  --text: #1f2328;
-  --muted: #59636e;
-  --border: #d1d9e0;
-  --accent: #0b5cad;
-  --problem: #b3261e;
-  --problem-background: #fdf0ef;
+@import 'tailwindcss' source('.');
 
-  color: var(--text);
-  font-family: system-ui, sans-serif;
-  line-height: 1.5;
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+  }
 }
 
-body {
-  margin: 0;
-}
-
-.page {
-  max-width: 42rem;
-  margin: 0 auto;
-  padding: 2rem 1rem 4rem;
-}
-
-/* react-day-picker sets its defaults on .rdp-root, so these must outrank it. */
-.page .rdp-root {
-  --rdp-accent-color: var(--accent);
-  --rdp-accent-background-color: #e6f0fa;
-}
-
-h1 {
-  margin: 0 0 0.25rem;
-  font-size: 1.75rem;
-}
-
-h2 {
-  margin: 0 0 0.5rem;
-  font-size: 1.25rem;
-}
-
-.lead {
-  margin-top: 0;
-  color: var(--muted);
-}
-
-fieldset {
-  margin: 0 0 1rem;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-}
-
-legend {
-  padding: 0 0.25rem;
-  font-weight: 600;
-}
-
-label {
-  font-weight: 600;
-}
-
-input,
-button {
-  font: inherit;
-}
-
-input {
-  padding: 0.25rem 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: 0.25rem;
-}
-
-input[aria-invalid='true'] {
-  border-color: var(--problem);
-}
-
-button {
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--accent);
-  border-radius: 0.25rem;
-  background: var(--accent);
-  color: #fff;
-  cursor: pointer;
-}
-
-button[aria-disabled='true'] {
-  opacity: 0.6;
-  cursor: progress;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.25rem;
-  margin: 1rem 0;
-}
-
-.hint {
-  color: var(--muted);
-  font-size: 0.875rem;
-}
-
-.problem,
-[role='alert'] {
-  color: var(--problem);
-}
-
-.notice {
-  color: var(--text);
-  padding: 0.75rem 1rem;
-  border-left: 4px solid var(--problem);
-  border-radius: 0.25rem;
-  background: var(--problem-background);
-}
-
-.notice p {
-  margin-top: 0;
-}
-
-.result:not(:empty) {
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
-}
-
-.result p {
-  margin: 0 0 0.5rem;
+/* react-day-picker's own CSS is unlayered and sets these on .rdp-root, so
+   this rule needs the extra specificity to win. */
+html .rdp-root {
+  --rdp-accent-color: var(--color-emerald-700);
+  --rdp-accent-background-color: var(--color-emerald-50);
+  --rdp-day-height: 2.25rem;
+  --rdp-day-width: 2.25rem;
+  --rdp-day_button-height: 2.125rem;
+  --rdp-day_button-width: 2.125rem;
+  --rdp-nav-height: 2.25rem;
 }

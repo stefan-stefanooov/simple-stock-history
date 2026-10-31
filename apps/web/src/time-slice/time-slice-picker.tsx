@@ -87,68 +87,93 @@ export function TimeSlicePicker({
     problem === 'too-short';
 
   return (
-    <fieldset>
-      <legend>Time Slice (UTC)</legend>
-      <p>
+    <fieldset className="min-w-0">
+      <legend className="text-sm font-semibold text-slate-900">
+        Time Slice (UTC)
+      </legend>
+      <p className="mt-1 text-sm text-slate-600">
         All dates and times are in UTC. Prices are available from{' '}
         {formatUtcDateTime(dataPeriod.from)} to{' '}
         {formatUtcDateTime(dataPeriod.to)}.
       </p>
-      <DayPicker
-        mode="range"
-        timeZone="UTC"
-        resetOnSelect
-        selected={selected}
-        onSelect={handleSelect}
-        defaultMonth={firstDate}
-        startMonth={firstDate}
-        endMonth={lastDate}
-        disabled={[{ before: firstDate }, { after: lastDate }]}
-      />
-      <p>
-        <label htmlFor={startTimeId}>Start time (UTC)</label>{' '}
-        <input
-          id={startTimeId}
-          type="time"
-          step={1}
-          required
-          value={draft.startTime}
-          onChange={(event) =>
-            update({ ...draft, startTime: event.target.value })
-          }
-          aria-invalid={startTimeInvalid}
-          aria-describedby={startTimeInvalid ? problemId : undefined}
+      <div className="mt-3 flex flex-wrap items-start gap-x-6 gap-y-4">
+        <DayPicker
+          className="rounded-lg border border-slate-200 bg-white px-3 py-2"
+          mode="range"
+          timeZone="UTC"
+          resetOnSelect
+          selected={selected}
+          onSelect={handleSelect}
+          defaultMonth={firstDate}
+          startMonth={firstDate}
+          endMonth={lastDate}
+          disabled={[{ before: firstDate }, { after: lastDate }]}
         />
-      </p>
-      <p>
-        <label htmlFor={endTimeId}>End time (UTC)</label>{' '}
-        <input
-          id={endTimeId}
-          type="time"
-          step={1}
-          required
-          value={draft.endTime}
-          onChange={(event) =>
-            update({ ...draft, endTime: event.target.value })
-          }
-          aria-invalid={endTimeInvalid}
-          aria-describedby={endTimeInvalid ? problemId : undefined}
-        />
-      </p>
-      <output aria-label="Selected Time Slice">
-        {result.ok &&
-          `Time Slice: ${formatUtcDateTime(result.timeSlice.from)} to ${formatUtcDateTime(result.timeSlice.to)}`}
-        {problem === 'no-days' &&
-          'Pick the first and last day in the calendar.'}
-      </output>
-      {problem && problem !== 'no-days' && (
-        <p id={problemId} role="alert">
-          {problemMessage(problem, dataPeriod)}
-        </p>
-      )}
+        <div className="flex min-w-44 flex-1 flex-col gap-3">
+          <p className="flex flex-col gap-1">
+            <label
+              htmlFor={startTimeId}
+              className="text-sm font-medium text-slate-700"
+            >
+              Start time (UTC)
+            </label>
+            <input
+              id={startTimeId}
+              className={TIME_INPUT_CLASS}
+              type="time"
+              step={1}
+              required
+              value={draft.startTime}
+              onChange={(event) =>
+                update({ ...draft, startTime: event.target.value })
+              }
+              aria-invalid={startTimeInvalid}
+              aria-describedby={startTimeInvalid ? problemId : undefined}
+            />
+          </p>
+          <p className="flex flex-col gap-1">
+            <label
+              htmlFor={endTimeId}
+              className="text-sm font-medium text-slate-700"
+            >
+              End time (UTC)
+            </label>
+            <input
+              id={endTimeId}
+              className={TIME_INPUT_CLASS}
+              type="time"
+              step={1}
+              required
+              value={draft.endTime}
+              onChange={(event) =>
+                update({ ...draft, endTime: event.target.value })
+              }
+              aria-invalid={endTimeInvalid}
+              aria-describedby={endTimeInvalid ? problemId : undefined}
+            />
+          </p>
+          <output
+            aria-label="Selected Time Slice"
+            className="block rounded-md bg-slate-100 px-3 py-2 text-sm text-slate-700 empty:hidden"
+          >
+            {result.ok &&
+              `Time Slice: ${formatUtcDateTime(result.timeSlice.from)} to ${formatUtcDateTime(result.timeSlice.to)}`}
+            {problem === 'no-days' &&
+              'Pick the first and last day in the calendar.'}
+          </output>
+          {problem && problem !== 'no-days' && (
+            <p id={problemId} role="alert" className="text-sm text-red-700">
+              {problemMessage(problem, dataPeriod)}
+            </p>
+          )}
+        </div>
+      </div>
     </fieldset>
   );
 }
+
+const TIME_INPUT_CLASS =
+  'w-full max-w-48 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-slate-900 shadow-xs focus:border-emerald-600 focus:outline-2 focus:outline-emerald-600/30 aria-invalid:border-red-600';
 
 /** The UTC day of a date DayPicker reports, as the epoch second of its midnight. */
 function dayOf(date: Date) {

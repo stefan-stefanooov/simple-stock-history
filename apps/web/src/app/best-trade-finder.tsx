@@ -6,7 +6,13 @@ import {
   type DataPeriod,
   type TimeSlice,
 } from '../time-slice';
-import { BestTradeResult, type QueryResult } from './best-trade-result';
+import {
+  BestTradeResult,
+  QueryFailed,
+  QueryInProgress,
+  QueryPlaceholder,
+  type QueryResult,
+} from './best-trade-result';
 import { errorMessage } from './error-message';
 
 export interface BestTradeFinderProps {
@@ -80,58 +86,84 @@ export function BestTradeFinder({ dataPeriod }: BestTradeFinderProps) {
   }
 
   return (
-    <>
-      <form noValidate onSubmit={handleSubmit}>
-        <TimeSlicePicker dataPeriod={dataPeriod} onChange={setTimeSlice} />
-        {showTimeSliceProblem && (
-          <p className="problem" role="alert">
-            Pick a valid Time Slice above.
-          </p>
-        )}
+    <div className="grid lg:h-full lg:grid-cols-[34rem_minmax(0,1fr)] xl:grid-cols-2">
+      <form
+        noValidate
+        onSubmit={handleSubmit}
+        aria-label="Query"
+        className="bg-white px-6 py-6 lg:overflow-y-auto xl:px-10"
+      >
+        <div className="mx-auto flex max-w-xl flex-col gap-5">
+          <div>
+            <TimeSlicePicker dataPeriod={dataPeriod} onChange={setTimeSlice} />
+            {showTimeSliceProblem && (
+              <p className="mt-2 text-sm text-red-700" role="alert">
+                Pick a valid Time Slice above.
+              </p>
+            )}
+          </div>
 
-        <div className="field">
-          <label htmlFor={fundsId}>Available Funds (USD)</label>
-          <span id={fundsHintId} className="hint">
-            The most you would spend on shares, e.g. 1,000 or 250.50.
-          </span>
-          <input
-            id={fundsId}
-            type="text"
-            inputMode="decimal"
-            autoComplete="off"
-            required
-            value={fundsText}
-            onChange={(event) => setFundsText(event.target.value)}
-            aria-invalid={showFundsProblem}
-            aria-describedby={
-              showFundsProblem
-                ? `${fundsHintId} ${fundsProblemId}`
-                : fundsHintId
-            }
-          />
-          {showFundsProblem && (
-            <span id={fundsProblemId} className="problem" role="alert">
-              {funds.message}
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor={fundsId}
+              className="text-sm font-semibold text-slate-900"
+            >
+              Available Funds (USD)
+            </label>
+            <span id={fundsHintId} className="text-sm text-slate-600">
+              The most you would spend on shares, e.g. 1,000 or 250.50.
             </span>
-          )}
-        </div>
+            <input
+              id={fundsId}
+              className="mt-1 w-full max-w-xs rounded-md border border-slate-300 bg-white px-3 py-2 text-lg text-slate-900 tabular-nums shadow-xs focus:border-emerald-600 focus:outline-2 focus:outline-emerald-600/30 aria-invalid:border-red-600"
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
+              required
+              value={fundsText}
+              onChange={(event) => setFundsText(event.target.value)}
+              aria-invalid={showFundsProblem}
+              aria-describedby={
+                showFundsProblem
+                  ? `${fundsHintId} ${fundsProblemId}`
+                  : fundsHintId
+              }
+            />
+            {showFundsProblem && (
+              <span
+                id={fundsProblemId}
+                className="text-sm text-red-700"
+                role="alert"
+              >
+                {funds.message}
+              </span>
+            )}
+          </div>
 
-        <p>
-          <button type="submit" aria-disabled={loading}>
-            Find best trade
-          </button>
-        </p>
+          <div>
+            <button
+              type="submit"
+              aria-disabled={loading}
+              className="rounded-lg bg-emerald-700 px-6 py-2.5 font-semibold text-white shadow-sm hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 aria-disabled:cursor-progress aria-disabled:opacity-60"
+            >
+              Find best trade
+            </button>
+          </div>
+        </div>
       </form>
 
-      <section className="result" aria-label="Result" aria-live="polite">
-        {query.status === 'loading' && <p>Finding the Best Trade…</p>}
-        {query.status === 'failed' && (
-          <p className="problem">
-            Could not find the Best Trade. {query.message}
-          </p>
-        )}
-        {query.status === 'done' && <BestTradeResult result={query.result} />}
+      <section
+        aria-label="Result"
+        aria-live="polite"
+        className="border-t border-slate-200 bg-slate-50 px-6 py-6 lg:overflow-y-auto lg:border-t-0 lg:border-l xl:px-10"
+      >
+        <div className="mx-auto max-w-xl lg:flex lg:min-h-full lg:flex-col lg:justify-center">
+          {query.status === 'idle' && <QueryPlaceholder />}
+          {query.status === 'loading' && <QueryInProgress />}
+          {query.status === 'failed' && <QueryFailed message={query.message} />}
+          {query.status === 'done' && <BestTradeResult result={query.result} />}
+        </div>
       </section>
-    </>
+    </div>
   );
 }

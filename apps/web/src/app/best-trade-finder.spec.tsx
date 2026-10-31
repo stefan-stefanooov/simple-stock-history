@@ -1,5 +1,5 @@
 import type { BestTradeResponse, Trade } from '@simple-stock-history/shared';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 
 import { getBestTrade, ProblemError } from '../api/api-client';
 import { BestTradeFinder } from './best-trade-finder';
@@ -83,6 +83,24 @@ function resultParagraphs() {
   return Array.from(resultRegion().querySelectorAll('p'), (p) => p.textContent);
 }
 
+/** Each figure the result names, e.g. `{ Profit: '$31.05' }`. */
+function resultFigures() {
+  return Object.fromEntries(
+    Array.from(resultRegion().querySelectorAll('dt'), (term) => [
+      term.textContent,
+      term.nextElementSibling?.textContent,
+    ]),
+  );
+}
+
+/** The Buy Point / Sell Point table, one `[row header, buy, sell]` per row. */
+function tradeTable() {
+  return Array.from(
+    within(resultRegion()).getByRole('table').querySelectorAll('tr'),
+    (row) => Array.from(row.cells, (cell) => cell.textContent),
+  );
+}
+
 /** Picks November 5th and enters the funds, then presses the button. */
 function queryNov5With(funds: string) {
   fireEvent.click(day('November 5th'));
@@ -100,7 +118,9 @@ describe('BestTradeFinder', () => {
     fireEvent.click(day('November 5th'));
     enterFunds('1,000');
     expect(getBestTrade).not.toHaveBeenCalled();
-    expect(resultRegion().textContent).toBe('');
+    expect(resultRegion().textContent).toBe(
+      'Your Best Trade will appear here.Pick a Time Slice, enter your Available Funds and press Find best trade.',
+    );
 
     pressFindBestTrade();
 
@@ -183,10 +203,26 @@ describe('BestTradeFinder', () => {
     await screen.findByRole('heading', { name: 'Best Trade' });
     // $1,000.00 buys 9 shares at $100.12 ($901.08), leaving $98.92; they sell
     // at $103.57 for $932.13, a Profit of 9 × $3.45 = $31.05.
+    expect(resultFigures()).toEqual({
+      Profit: '$31.05',
+      'Available Funds': '$1,000.00',
+      'Left over': '$98.92',
+    });
     expect(resultParagraphs()).toEqual([
-      'Between Nov 5, 2025, 00:00:00 UTC and Nov 5, 2025, 23:59:59 UTC, you should have bought 9 shares on Nov 5, 2025, 08:15:01 UTC at $100.12 a share, spending $901.08.',
-      'You should then have sold them on Nov 5, 2025, 14:05:09 UTC at $103.57 a share, for $932.13.',
-      'That is a Profit of $31.05 ($3.45 a share), with $98.92 of your $1,000.00 left unspent.',
+      'Time Slice Nov 5, 2025, 00:00:00 UTC to Nov 5, 2025, 23:59:59 UTC',
+      '9 shares × $3.45 a share',
+      'You should have bought 9 shares on Nov 5, 2025, 08:15:01 UTC and sold them on Nov 5, 2025, 14:05:09 UTC.',
+    ]);
+    expect(tradeTable()).toEqual([
+      ['', 'Buy Point', 'Sell Point'],
+      [
+        'Date and time',
+        'Nov 5, 2025, 08:15:01 UTC',
+        'Nov 5, 2025, 14:05:09 UTC',
+      ],
+      ['Price per share', '$100.12', '$103.57'],
+      ['Whole shares', '9 shares', '9 shares'],
+      ['Cost / sale total', '$901.08', '$932.13'],
     ]);
   });
 
@@ -204,8 +240,13 @@ describe('BestTradeFinder', () => {
         time.getAttribute('datetime'),
       ),
     ).toEqual([
+      // the Time Slice
       '2025-11-05T00:00:00Z',
       '2025-11-05T23:59:59Z',
+      // the sentence
+      '2025-11-05T08:15:01Z',
+      '2025-11-05T14:05:09Z',
+      // the table
       '2025-11-05T08:15:01Z',
       '2025-11-05T14:05:09Z',
     ]);
@@ -220,10 +261,17 @@ describe('BestTradeFinder', () => {
     queryNov5With('100.12');
 
     await screen.findByRole('heading', { name: 'Best Trade' });
-    expect(resultParagraphs()).toEqual([
-      'Between Nov 5, 2025, 00:00:00 UTC and Nov 5, 2025, 23:59:59 UTC, you should have bought 1 share on Nov 5, 2025, 08:15:01 UTC at $100.12 a share, spending $100.12.',
-      'You should then have sold it on Nov 5, 2025, 14:05:09 UTC at $103.57 a share, for $103.57.',
-      'That is a Profit of $3.45 ($3.45 a share), with $0.00 of your $100.12 left unspent.',
+    expect(resultParagraphs()).toContain(
+      'You should have bought 1 share on Nov 5, 2025, 08:15:01 UTC and sold it on Nov 5, 2025, 14:05:09 UTC.',
+    );
+    expect(resultFigures()).toEqual({
+      Profit: '$3.45',
+      'Available Funds': '$100.12',
+      'Left over': '$0.00',
+    });
+    expect(tradeTable().slice(3)).toEqual([
+      ['Whole shares', '1 share', '1 share'],
+      ['Cost / sale total', '$100.12', '$103.57'],
     ]);
   });
 
@@ -236,9 +284,19 @@ describe('BestTradeFinder', () => {
     queryNov5With('50');
 
     await screen.findByRole('heading', { name: 'Best Trade' });
-    expect(resultParagraphs()).toEqual([
-      'Between Nov 5, 2025, 00:00:00 UTC and Nov 5, 2025, 23:59:59 UTC, the Best Trade buys on Nov 5, 2025, 08:15:01 UTC at $100.12 a share and sells on Nov 5, 2025, 14:05:09 UTC at $103.57 a share, a Profit of $3.45 a share.',
-      'Your Available Funds of $50.00 do not cover the price of one share, so you could not have bought any.',
+    expect(resultFigures()).toEqual({ 'Profit per share': '$3.45' });
+    expect(within(resultRegion()).getByRole('note').textContent).toBe(
+      'Your Available Funds of $50.00 do not cover the price of one share at the Buy Point, so you could not have bought any.',
+    );
+    // Only when and at what price: no shares were bought.
+    expect(tradeTable()).toEqual([
+      ['', 'Buy Point', 'Sell Point'],
+      [
+        'Date and time',
+        'Nov 5, 2025, 08:15:01 UTC',
+        'Nov 5, 2025, 14:05:09 UTC',
+      ],
+      ['Price per share', '$100.12', '$103.57'],
     ]);
   });
 
@@ -251,10 +309,12 @@ describe('BestTradeFinder', () => {
     queryNov5With('1,000');
 
     await screen.findByRole('heading', { name: 'No Profitable Trade' });
-    expect(resultParagraphs()).toEqual([
+    expect(resultFigures()).toEqual({ Profit: '$0.00' });
+    expect(resultParagraphs().slice(1)).toEqual([
       'Between Nov 5, 2025, 00:00:00 UTC and Nov 5, 2025, 23:59:59 UTC, the price never rose, so no Trade would have made a Profit.',
-      'You should not have bought at all.',
+      'You should not have bought at all, and kept your $1,000.00.',
     ]);
+    expect(within(resultRegion()).queryByRole('table')).toBe(null);
   });
 
   it('shows why the API refused the query', async () => {
@@ -270,11 +330,12 @@ describe('BestTradeFinder', () => {
 
     queryNov5With('1,000');
 
-    await waitFor(() =>
-      expect(resultRegion().textContent).toBe(
-        'Could not find the Best Trade. A Time Slice must be at least 2 seconds long.',
-      ),
-    );
+    await screen.findByRole('heading', {
+      name: 'Could not find the Best Trade',
+    });
+    expect(resultParagraphs()).toEqual([
+      'A Time Slice must be at least 2 seconds long.',
+    ]);
     expect(findBestTradeButton().getAttribute('aria-disabled')).toBe('false');
   });
 
@@ -295,11 +356,10 @@ describe('BestTradeFinder', () => {
 
     queryNov5With('100,000,000');
 
-    await waitFor(() =>
-      expect(resultRegion().textContent).toBe(
-        `Could not find the Best Trade. ${UNEXPECTED_ERROR_MESSAGE}`,
-      ),
-    );
+    await screen.findByRole('heading', {
+      name: 'Could not find the Best Trade',
+    });
+    expect(resultParagraphs()).toEqual([UNEXPECTED_ERROR_MESSAGE]);
     expect(consoleError).toHaveBeenCalledWith(expect.any(RangeError));
     consoleError.mockRestore();
   });
@@ -330,7 +390,7 @@ describe('BestTradeFinder', () => {
       expect.anything(),
     );
     await screen.findByRole('heading', { name: 'No Profitable Trade' });
-    expect(resultParagraphs()[0]).toBe(
+    expect(resultParagraphs()[1]).toBe(
       'Between Nov 5, 2025, 00:00:00 UTC and Nov 7, 2025, 23:59:59 UTC, the price never rose, so no Trade would have made a Profit.',
     );
   });
