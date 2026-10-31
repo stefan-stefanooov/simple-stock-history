@@ -5,6 +5,9 @@
   "references": [
     {
       "path": "./libs/shared"
+    },
+    {
+      "path": "./tools/price-history-generator"
     }
   ],
   "compilerOptions": {}
