@@ -40,6 +40,9 @@ lerna-debug.log*
 .temp
 .tmp
 
+# Claude Code agent worktrees: full checkouts that Nx would scan as projects
+/.claude/worktrees/
+
 # IDEs and editors
 /.idea
 .vscode/*
