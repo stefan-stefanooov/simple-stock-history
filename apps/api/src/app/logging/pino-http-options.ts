@@ -6,6 +6,7 @@ import type {
 import { type LevelWithSilent, stdTimeFunctions } from 'pino';
 import type { Options } from 'pino-http';
 import type { AppConfig } from '../config/app-config';
+import { isProbeRequest } from '../health/probe-routes';
 
 /** What pino-http hands a custom `req` serializer: pino's standard fields, plus the raw request. */
 interface StdSerializedRequest {
@@ -56,6 +57,9 @@ export function createPinoHttpOptions(config: AppConfig): Options {
     level: config.logLevel,
     customLogLevel: requestLogLevel,
     serializers: { req: serializeRequest, res: serializeResponse },
+    // The kubelet probes every few seconds; logging that would drown the
+    // real requests. The readiness registry logs readiness changes instead.
+    autoLogging: { ignore: (req) => isProbeRequest(req.url) },
   };
 
   if (config.nodeEnv === 'development') {
