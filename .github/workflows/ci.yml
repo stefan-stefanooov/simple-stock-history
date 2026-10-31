@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# nx-set-shas reads past runs of this workflow to find the last green commit on main
+permissions:
+  contents: read
+  actions: read
+
+# A new push to a PR supersedes the run in progress; every commit on main gets its own run
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  ci:
+    name: Lint, test, typecheck, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # nx affected needs the history back to the merge base
+          fetch-depth: 0
+          persist-credentials: false
+
+      # Version comes from packageManager in package.json. Only the pnpm store is
+      # cached: Nx 24 rejects task-cache files restored from another machine, so
+      # sharing those between runs needs a remote cache (Nx Cloud or self-hosted).
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          cache: true
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      - id: install
+        run: pnpm install --frozen-lockfile
+
+      # Sets NX_BASE (merge base on PRs, last green commit on main) and NX_HEAD
+      - uses: nrwl/nx-set-shas@e602fada7ad5987b0f7b1905e7a99ea1c661514c # v5.1.0
+
+      # The checks below run even if an earlier one fails, so one run reports every problem
+      - id: affected
+        name: Lint, test, typecheck and build affected projects
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm nx affected -t lint test typecheck build
+
+      - id: format
+        name: Check formatting
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm format:check
+
+      - id: sync
+        name: Check TypeScript project references
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm nx sync:check
+
+      - name: Write job summary
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        env:
+          AFFECTED: ${{ steps.affected.outcome }}
+          FORMAT: ${{ steps.format.outcome }}
+          SYNC: ${{ steps.sync.outcome }}
+        run: |
+          icon() { case "$1" in success) echo "✅" ;; failure) echo "❌" ;; *) echo "⏭️ $1" ;; esac; }
+          projects() { pnpm --silent nx show projects --affected --with-target="$1" --json | jq -r 'if length == 0 then "none" else map("`\(.)`") | join(", ") end'; }
+          {
+            echo "### CI"
+            echo
+            echo "Compared [\`${NX_BASE:0:7}...${NX_HEAD:0:7}\`](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/compare/${NX_BASE}...${NX_HEAD})"
+            echo
+            echo "| Check | Result |"
+            echo "| --- | --- |"
+            echo "| Lint, test, typecheck, build (affected) | $(icon "$AFFECTED") |"
+            echo "| Formatting (Prettier) | $(icon "$FORMAT") |"
+            echo "| TypeScript project references | $(icon "$SYNC") |"
+            echo
+            echo "| Target | Affected projects |"
+            echo "| --- | --- |"
+            for target in lint test typecheck build; do
+              echo "| \`$target\` | $(projects "$target") |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
