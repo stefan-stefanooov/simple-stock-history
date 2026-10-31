@@ -1,5 +1,4 @@
 import {
-  formatUtcSecond,
   parseTimeOfDay,
   toTimeSlice,
   utcDayStart,
@@ -158,12 +157,5 @@ describe('toTimeSlice', () => {
         fromNoon,
       ),
     ).toEqual({ ok: true, timeSlice: fromNoon });
-  });
-});
-
-describe('formatUtcSecond', () => {
-  it('writes the second in UTC', () => {
-    expect(formatUtcSecond(NOVEMBER.from)).toBe('2025-11-01 00:00:00 UTC');
-    expect(formatUtcSecond(NOVEMBER.to)).toBe('2025-11-30 23:59:59 UTC');
   });
 });

@@ -51,6 +51,16 @@ describe('TimeSlicePicker', () => {
     );
   });
 
+  it('states the Data Period with month names, in UTC, to the second', () => {
+    renderPicker();
+
+    expect(
+      screen.getByText(/^All dates and times are in UTC\./).textContent,
+    ).toBe(
+      'All dates and times are in UTC. Prices are available from Nov 1, 2025, 00:00:00 UTC to Nov 30, 2025, 23:59:59 UTC.',
+    );
+  });
+
   it('shows only the months of the Data Period', () => {
     renderPicker();
 
@@ -126,7 +136,7 @@ describe('TimeSlicePicker', () => {
         to: NOV_7 + DAY - 1,
       });
       expect(summary().textContent).toBe(
-        'Time Slice: 2025-11-05 00:00:00 UTC to 2025-11-07 23:59:59 UTC',
+        'Time Slice: Nov 5, 2025, 00:00:00 UTC to Nov 7, 2025, 23:59:59 UTC',
       );
     });
 
@@ -209,6 +219,25 @@ describe('TimeSlicePicker', () => {
 
     expect(onChange).toHaveBeenLastCalledWith(null);
     expect(screen.getByRole('alert').textContent).toMatch(/at least 2 seconds/);
+  });
+
+  it('blocks seconds outside a Data Period that starts mid-day', () => {
+    const fromNoon = { from: NOV_5 + 12 * 3600, to: NOV_7 + 12 * 3600 - 1 };
+    const onChange = renderPicker(fromNoon);
+
+    fireEvent.click(day('November 5th'));
+
+    // Still no Time Slice, so nothing has changed to report.
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByRole('alert').textContent).toBe(
+      'The Time Slice must lie within Nov 5, 2025, 12:00:00 UTC to Nov 7, 2025, 11:59:59 UTC.',
+    );
+
+    setTime(startTime(), '12:00:00');
+    expect(onChange).toHaveBeenLastCalledWith({
+      from: fromNoon.from,
+      to: NOV_5 + DAY - 1,
+    });
   });
 
   it('blocks a missing time', () => {

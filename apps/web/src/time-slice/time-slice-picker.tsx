@@ -1,10 +1,10 @@
 import { useId, useState } from 'react';
 import { DayPicker, type DateRange } from 'react-day-picker';
 import 'react-day-picker/style.css';
+import { formatUtcDateTime } from '../date-time';
 import {
   DEFAULT_END_TIME,
   DEFAULT_START_TIME,
-  formatUtcSecond,
   toTimeSlice,
   utcDayStart,
   type DataPeriod,
@@ -91,7 +91,8 @@ export function TimeSlicePicker({
       <legend>Time Slice (UTC)</legend>
       <p>
         All dates and times are in UTC. Prices are available from{' '}
-        {formatUtcSecond(dataPeriod.from)} to {formatUtcSecond(dataPeriod.to)}.
+        {formatUtcDateTime(dataPeriod.from)} to{' '}
+        {formatUtcDateTime(dataPeriod.to)}.
       </p>
       <DayPicker
         mode="range"
@@ -136,7 +137,7 @@ export function TimeSlicePicker({
       </p>
       <output aria-label="Selected Time Slice">
         {result.ok &&
-          `Time Slice: ${formatUtcSecond(result.timeSlice.from)} to ${formatUtcSecond(result.timeSlice.to)}`}
+          `Time Slice: ${formatUtcDateTime(result.timeSlice.from)} to ${formatUtcDateTime(result.timeSlice.to)}`}
         {problem === 'no-days' &&
           'Pick the first and last day in the calendar.'}
       </output>
@@ -176,6 +177,6 @@ function problemMessage(
     case 'too-short':
       return 'The Time Slice must span at least 2 seconds: a Trade buys before it sells.';
     case 'outside-data-period':
-      return `The Time Slice must lie within ${formatUtcSecond(dataPeriod.from)} to ${formatUtcSecond(dataPeriod.to)}.`;
+      return `The Time Slice must lie within ${formatUtcDateTime(dataPeriod.from)} to ${formatUtcDateTime(dataPeriod.to)}.`;
   }
 }

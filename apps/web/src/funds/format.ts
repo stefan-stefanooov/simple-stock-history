@@ -1,7 +1,7 @@
 /**
- * Formatting of the amounts, share counts and seconds shown to the user. The
- * locale is fixed to `en-US` and every date is shown in UTC, so the output
- * never depends on the browser's language or time zone.
+ * Formatting of the amounts and share counts shown to the user. The locale is
+ * fixed to `en-US`, so the output never depends on the browser's language.
+ * Dates and times are formatted by `formatUtcDateTime` in `../date-time`.
  */
 
 const usd = new Intl.NumberFormat('en-US', {
@@ -13,18 +13,6 @@ const usd = new Intl.NumberFormat('en-US', {
 
 const wholeNumber = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 0,
-});
-
-const utcDateTime = new Intl.DateTimeFormat('en-US', {
-  timeZone: 'UTC',
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-  second: '2-digit',
-  hourCycle: 'h23',
-  timeZoneName: 'short',
 });
 
 /**
@@ -54,22 +42,6 @@ export function formatUsd(cents: number): string {
 export function formatShares(shares: number): string {
   assertNonNegativeSafeInteger(shares, 'shares');
   return `${wholeNumber.format(shares)} ${shares === 1 ? 'share' : 'shares'}`;
-}
-
-/**
- * Formats a second, given as Unix epoch seconds, as a UTC date and time to the
- * second, e.g. `1762178709` as `"Nov 3, 2025, 14:05:09 UTC"`.
- *
- * @throws RangeError if `epochSeconds` is not a safe integer or lies outside
- * the range a `Date` can hold.
- */
-export function formatUtcDateTime(epochSeconds: number): string {
-  if (!Number.isSafeInteger(epochSeconds)) {
-    throw new RangeError(
-      `epochSeconds must be a safe integer, got ${epochSeconds}`,
-    );
-  }
-  return utcDateTime.format(new Date(epochSeconds * 1000));
 }
 
 function assertNonNegativeSafeInteger(value: number, name: string): void {
