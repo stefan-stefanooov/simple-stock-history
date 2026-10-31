@@ -56,7 +56,8 @@
         "executor": "@nx/js:node",
         "defaultConfiguration": "development",
         "dependsOn": [
-          "build"
+          "build",
+          "price-history-generator:generate"
         ],
         "options": {
           "buildTarget": "api:build",
@@ -72,6 +73,10 @@
         }
       },
       "test": {
+        "dependsOn": [
+          "^build",
+          "price-history-generator:generate"
+        ],
         "options": {
           "passWithNoTests": true
         }

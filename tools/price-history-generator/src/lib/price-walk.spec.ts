@@ -1,10 +1,10 @@
 import { isDeepStrictEqual } from 'node:util';
-import { mulberry32 } from './mulberry32.js';
+import { mulberry32 } from './mulberry32.ts';
 import {
   createStepDraw,
   generatePriceHistory,
   type PriceWalkOptions,
-} from './price-walk.js';
+} from './price-walk.ts';
 
 // The walk agreed in #2 and #12: start at $100.00, ±5¢ steps, floor at $1.00.
 const AGREED_WALK = {

@@ -1,4 +1,4 @@
-import { mulberry32 } from './mulberry32.js';
+import { mulberry32 } from './mulberry32.ts';
 
 function firstDraws(seed: number, n: number): number[] {
   const next = mulberry32(seed);

@@ -1,0 +1,9 @@
+{
+  "seed": 20251101,
+  "dataPeriodStart": 1761955200,
+  "count": 2592000,
+  "startPriceCents": 10000,
+  "maxStepCents": 5,
+  "floorPriceCents": 100,
+  "sha256": "4b3e4ed7de22b45d67531ac86a150fd35fd1a4de8c9624e169f1083c81da7a44"
+}
