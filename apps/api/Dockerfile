@@ -5,7 +5,8 @@
 # as a non-root user. Build from the repository root:
 #   docker build --platform linux/amd64 -f apps/api/Dockerfile -t stock-history-api .
 #   docker run --rm -p 3000:3000 stock-history-api
-# Then try http://localhost:3000/api/v1/period, /api/docs, /healthz and /readyz.
+# Then try http://localhost:3000/api/v1/period, /api/docs, /healthz, /readyz
+# and /metrics.
 # Settings are env vars (apps/api/src/app/config/app-config.ts), for example
 #   docker run --rm -p 3000:3000 -e LOG_LEVEL=debug -e SWAGGER_ENABLED=false stock-history-api
 

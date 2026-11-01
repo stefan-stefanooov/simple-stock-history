@@ -6,6 +6,7 @@ import { writePriceHistoryFixture } from '../../testing/price-history-fixture';
 import { loadConfig } from '../config/app-config';
 import { ConfigModule, APP_CONFIG } from '../config/config.module';
 import { HealthModule } from '../health/health.module';
+import { MetricsModule } from '../metrics/metrics.module';
 import { BEST_TRADE_SEARCH } from './best-trade-search.provider';
 import { BestTradeModule } from './best-trade.module';
 
@@ -17,7 +18,7 @@ describe('BestTradeModule', () => {
     jest.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
     fixture = await writePriceHistoryFixture();
     moduleRef = await Test.createTestingModule({
-      imports: [ConfigModule, HealthModule, BestTradeModule],
+      imports: [ConfigModule, HealthModule, MetricsModule, BestTradeModule],
     })
       .overrideProvider(APP_CONFIG)
       .useValue(
