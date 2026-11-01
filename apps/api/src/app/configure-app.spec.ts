@@ -84,11 +84,24 @@ describe('configureApp', () => {
 
     expect(response.headers).toMatchObject({
       'content-security-policy': expect.any(String),
-      'strict-transport-security': expect.any(String),
+      'cross-origin-opener-policy': 'same-origin',
+      'cross-origin-resource-policy': 'same-origin',
+      'origin-agent-cluster': '?1',
+      'referrer-policy': 'no-referrer',
       'x-content-type-options': 'nosniff',
+      'x-dns-prefetch-control': 'off',
+      'x-download-options': 'noopen',
       'x-frame-options': 'SAMEORIGIN',
+      'x-permitted-cross-domain-policies': 'none',
+      'x-xss-protection': '0',
     });
     expect(response.headers['x-powered-by']).toBeUndefined();
+  });
+
+  it('leaves Strict-Transport-Security to Traefik (homelab#6)', async () => {
+    const response = await request(app.getHttpServer()).get('/api');
+
+    expect(response.headers['strict-transport-security']).toBeUndefined();
   });
 
   it('logs each request as a JSON line with the client IP from X-Forwarded-For', async () => {

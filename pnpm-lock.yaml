@@ -426,7 +426,11 @@ importers:
 
   tools/lint-rules: {}
 
-  tools/price-history-generator: {}
+  tools/price-history-generator:
+    dependencies:
+      '@simple-stock-history/best-trade':
+        specifier: workspace:*
+        version: link:../../libs/best-trade
 
 packages:
 

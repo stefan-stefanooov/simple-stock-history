@@ -24,7 +24,9 @@ const TRUSTED_PROXY_HOPS = 1;
 export function configureApp(app: NestExpressApplication): void {
   app.useLogger(app.get(Logger));
   app.set('trust proxy', TRUSTED_PROXY_HOPS);
-  app.use(helmet());
+  // HSTS is set once for the whole host by Traefik, which terminates TLS
+  // (homelab#6), so `/api` and the web app on `/` never disagree.
+  app.use(helmet({ hsts: false }));
   app.setGlobalPrefix(GLOBAL_PREFIX, { exclude: [...PROBE_PATHS] });
   setupSwagger(app);
   // On SIGTERM (Kubernetes stopping the pod) or SIGINT (Ctrl+C), Nest runs the

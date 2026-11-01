@@ -5,5 +5,7 @@
   "startPriceCents": 10000,
   "maxStepCents": 5,
   "floorPriceCents": 100,
-  "sha256": "4b3e4ed7de22b45d67531ac86a150fd35fd1a4de8c9624e169f1083c81da7a44"
+  "sha256": "4b3e4ed7de22b45d67531ac86a150fd35fd1a4de8c9624e169f1083c81da7a44",
+  "hourLength": 3600,
+  "hourSummariesSha256": "503140dfaa636e22670319df2b00553f47e5eb6678f9e49eba900f0c476da0fe"
 }
