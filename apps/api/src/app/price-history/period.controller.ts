@@ -5,6 +5,7 @@ import {
   type PeriodResponse,
   ShareSchema,
 } from '@simple-stock-history/shared';
+import { CACHE_FOR_A_DAY } from '../cache-control';
 import { PeriodResponseDto } from '../dtos';
 import { PriceHistory } from './price-history';
 
@@ -14,9 +15,8 @@ export class PeriodController {
   constructor(private readonly priceHistory: PriceHistory) {}
 
   @Get()
-  // The Data Period is fixed for a release (ADR-0001), so clients and proxies
-  // may keep the answer for a day, like every successful API response (#2).
-  @Header('Cache-Control', 'public, max-age=86400')
+  // The Data Period is fixed for a release (ADR-0001).
+  @Header('Cache-Control', CACHE_FOR_A_DAY)
   @ApiOperation({
     summary: 'The Share and the Data Period its Price History covers',
     description:

@@ -9,9 +9,11 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { ApiOkResponse, type OpenAPIObject } from '@nestjs/swagger';
 import { Test } from '@nestjs/testing';
 import {
+  BestTradeResponseSchema,
   PROBLEM_JSON_MEDIA_TYPE,
   ProblemDetailsSchema,
 } from '@simple-stock-history/shared';
+import { join } from 'node:path';
 import request from 'supertest';
 import type { PriceHistoryFixture } from '../../testing/price-history-fixture.interface';
 import { writePriceHistoryFixture } from '../../testing/price-history-fixture';
@@ -25,7 +27,28 @@ import { ApiProblemResponse } from './api-problem-response.decorator';
 const PROBLEM_REF = { $ref: '#/components/schemas/ProblemDetailsDto' };
 const PROBLEM_CONTENT = { [PROBLEM_JSON_MEDIA_TYPE]: { schema: PROBLEM_REF } };
 
-/** A stand-in for the Best Trade endpoint, documented the way it will be. */
+/** The real Price History, written by `price-history-generator:generate`, which `api:test` depends on. */
+const REAL_PRICE_HISTORY_PATH = join(
+  __dirname,
+  '../../../../../data/acme-2025-11.bin',
+);
+
+const BEST_TRADE_PATH = '/api/v1/trades/best';
+
+/** The named examples of one response's body in an OpenAPI document. */
+type Examples = Record<string, { summary: string; value: unknown }>;
+
+function examplesOf(
+  document: OpenAPIObject,
+  status: string,
+  mediaType: string,
+): Examples {
+  const response = document.paths[BEST_TRADE_PATH]?.get?.responses[status] as
+    { content?: Record<string, { examples?: Examples }> } | undefined;
+  return response?.content?.[mediaType]?.examples ?? {};
+}
+
+/** Stand-in routes that exercise how setupSwagger documents any route. */
 @Controller('test/trades')
 class DocumentedController {
   @Get('best')
@@ -59,6 +82,7 @@ afterAll(async () => {
 
 async function createApp(
   env: Record<string, string>,
+  priceHistoryPath = priceHistory.paths.priceHistory,
 ): Promise<NestExpressApplication> {
   const moduleRef = await Test.createTestingModule({
     imports: [AppModule],
@@ -68,7 +92,7 @@ async function createApp(
     .useValue(
       loadConfig({
         NODE_ENV: 'test',
-        PRICE_HISTORY_PATH: priceHistory.paths.priceHistory,
+        PRICE_HISTORY_PATH: priceHistoryPath,
         ...env,
       }),
     )
@@ -224,6 +248,64 @@ describe('Swagger docs, SWAGGER_ENABLED=true', () => {
     );
   });
 
+  it('documents GET /api/v1/trades/best with the shared zod schemas', () => {
+    const best = operation(BEST_TRADE_PATH);
+
+    expect(best?.summary).toBe('The Best Trade in a Time Slice');
+    expect(best?.description).toContain('No Profitable Trade');
+    expect(best?.parameters).toEqual([
+      expect.objectContaining({
+        name: 'from',
+        in: 'query',
+        required: true,
+        schema: expect.objectContaining({ pattern: '^[0-9]+$' }),
+      }),
+      expect.objectContaining({ name: 'to', in: 'query', required: true }),
+    ]);
+    expect(best?.responses['200']).toMatchObject({
+      content: {
+        'application/json': {
+          schema: { $ref: '#/components/schemas/BestTradeResponseDto_Output' },
+        },
+      },
+    });
+    expect(best?.responses['400']).toMatchObject({
+      description: expect.stringContaining('outside the Data Period'),
+      content: PROBLEM_CONTENT,
+    });
+    expect(best?.responses['422']).toMatchObject({
+      description: expect.stringContaining('shorter than 2 seconds'),
+      content: PROBLEM_CONTENT,
+    });
+    expect(best?.responses['500']).toMatchObject({ content: PROBLEM_CONTENT });
+  });
+
+  it('gives GET /api/v1/trades/best an example for each case, valid against the shared zod schemas', () => {
+    const ok = Object.values(examplesOf(document, '200', 'application/json'));
+    const badRequest = Object.values(
+      examplesOf(document, '400', PROBLEM_JSON_MEDIA_TYPE),
+    );
+    const unprocessable = Object.values(
+      examplesOf(document, '422', PROBLEM_JSON_MEDIA_TYPE),
+    );
+
+    const trades = ok.map(
+      ({ value }) => BestTradeResponseSchema.parse(value).trade,
+    );
+    expect(trades).toContainEqual(
+      expect.objectContaining({ profitCents: expect.any(Number) }),
+    );
+    expect(trades).toContainEqual(null);
+    expect(badRequest.length).toBeGreaterThanOrEqual(3);
+    for (const { value } of badRequest) {
+      expect(ProblemDetailsSchema.parse(value).status).toBe(400);
+    }
+    expect(unprocessable).toHaveLength(1);
+    for (const { value } of unprocessable) {
+      expect(ProblemDetailsSchema.parse(value).status).toBe(422);
+    }
+  });
+
   it('describes the problem+json body with the shared zod schema', () => {
     const schema = document.components?.schemas?.['ProblemDetailsDto'] as {
       properties: Record<string, unknown>;
@@ -303,4 +385,52 @@ describe('Swagger docs, SWAGGER_ENABLED=false', () => {
 
     expect(response.status).toBe(200);
   });
+});
+
+describe('Swagger examples of GET /api/v1/trades/best', () => {
+  let app: NestExpressApplication;
+  let document: OpenAPIObject;
+
+  beforeAll(async () => {
+    app = await createApp({ SWAGGER_ENABLED: 'true' }, REAL_PRICE_HISTORY_PATH);
+    document = (
+      await request(app.getHttpServer()).get('/api/docs/openapi.json')
+    ).body;
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  const exampleCases = (status: string, mediaType: string) =>
+    Object.entries(examplesOf(document, status, mediaType));
+
+  it('are what the API answers for the real Price History: 200', async () => {
+    const examples = exampleCases('200', 'application/json');
+
+    expect(examples.length).toBeGreaterThan(0);
+    for (const [, { value }] of examples) {
+      const { from, to } = value as { from: number; to: number };
+      const response = await request(app.getHttpServer()).get(
+        `${BEST_TRADE_PATH}?from=${from}&to=${to}`,
+      );
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(value);
+    }
+  });
+
+  it.each(['400', '422'])(
+    'are what the API answers for the real Price History: %s',
+    async (status) => {
+      const examples = exampleCases(status, PROBLEM_JSON_MEDIA_TYPE);
+
+      expect(examples.length).toBeGreaterThan(0);
+      for (const [, { value }] of examples) {
+        const { instance } = value as { instance: string };
+        const response = await request(app.getHttpServer()).get(instance);
+        expect(response.status).toBe(Number(status));
+        expect(response.body).toEqual(value);
+      }
+    },
+  );
 });
