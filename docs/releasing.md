@@ -49,8 +49,11 @@ files are not used and are not bumped.
    docker inspect --format '{{json .Config.Labels}}' ghcr.io/stefan-stefanooov/stock-history-api:1.2.3
    ```
 
-6. Deploy: bump the image tags in the homelab repo and push to its `main`
-   (see `~/projects/homelab/docs/deploying-to-the-lab.md`).
+6. Deploy: open a PR in the
+   [homelab repo](https://github.com/stefan-stefanooov/homelab) that bumps
+   both image tags to `X.Y.Z`. Merging it to homelab `main` is the deploy:
+   Argo CD syncs it right away. Then check that the Application is Synced and
+   Healthy: `kubectl -n argocd get applications`.
 
 ## First release only: make the packages public
 
