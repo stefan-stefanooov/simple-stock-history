@@ -21,16 +21,20 @@
         "cache": true,
         "inputs": [
           "production",
+          "^production",
           {
             "runtime": "node --version"
           }
         ],
         "outputs": [
           "{workspaceRoot}/data/acme-2025-11.bin",
+          "{workspaceRoot}/data/acme-2025-11.hours.bin",
           "{workspaceRoot}/data/acme-2025-11.meta.json"
         ]
       }
     }
   },
-  "dependencies": {}
+  "dependencies": {
+    "@simple-stock-history/best-trade": "workspace:*"
+  }
 }

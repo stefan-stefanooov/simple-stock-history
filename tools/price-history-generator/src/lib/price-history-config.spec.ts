@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { HOUR_LENGTH } from '@simple-stock-history/best-trade';
 import { DEFAULT_CONFIG_PATH } from './cli.ts';
 import { parsePriceHistoryConfig } from './price-history-config.ts';
 
@@ -10,6 +11,8 @@ const VALID = {
   maxStepCents: 5,
   floorPriceCents: 100,
   sha256: 'ab'.repeat(32),
+  hourLength: 6,
+  hourSummariesSha256: 'cd'.repeat(32),
 };
 
 describe('parsePriceHistoryConfig', () => {
@@ -30,6 +33,14 @@ describe('parsePriceHistoryConfig', () => {
       maxStepCents: 5,
       floorPriceCents: 100,
     });
+  });
+
+  // ADR-0002: hours of 3,600 Price Points in production.
+  it('commits the production hour length', () => {
+    const committed = parsePriceHistoryConfig(
+      JSON.parse(readFileSync(DEFAULT_CONFIG_PATH, 'utf8')),
+    );
+    expect(committed.hourLength).toBe(HOUR_LENGTH);
   });
 
   it.each<[string, unknown, RegExp]>([
@@ -61,6 +72,27 @@ describe('parsePriceHistoryConfig', () => {
     ['a negative count', { ...VALID, count: -1 }, /count/],
     ['an uppercase sha256', { ...VALID, sha256: 'AB'.repeat(32) }, /sha256/],
     ['a short sha256', { ...VALID, sha256: 'ab' }, /sha256/],
+    [
+      'a config without an hour length',
+      Object.fromEntries(
+        Object.entries(VALID).filter(([key]) => key !== 'hourLength'),
+      ),
+      /Missing config field\(s\): hourLength/,
+    ],
+    ['an hour length of 0', { ...VALID, hourLength: 0 }, /hourLength/],
+    ['a fractional hour length', { ...VALID, hourLength: 1.5 }, /hourLength/],
+    [
+      'a config without the hour summaries sha256',
+      Object.fromEntries(
+        Object.entries(VALID).filter(([key]) => key !== 'hourSummariesSha256'),
+      ),
+      /Missing config field\(s\): hourSummariesSha256/,
+    ],
+    [
+      'an uppercase hour summaries sha256',
+      { ...VALID, hourSummariesSha256: 'CD'.repeat(32) },
+      /hourSummariesSha256 must be 64 lowercase hex digits/,
+    ],
   ])('rejects %s', (_, value, message) => {
     expect(() => parsePriceHistoryConfig(value)).toThrow(message);
   });
