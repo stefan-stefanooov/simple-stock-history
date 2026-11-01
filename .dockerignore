@@ -11,5 +11,7 @@
 **/test-output
 **/coverage
 tmp
+# The api image generates and checks the Price History itself (ADR-0001)
+data
 **/*.log
 **/.env*
