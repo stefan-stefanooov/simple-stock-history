@@ -30,7 +30,12 @@ const envSchema = z.object({
   PRICE_HISTORY_PATH: z
     .string()
     .trim()
-    .min(1, { error: 'must not be empty' })
+    .min(1, { error: 'must not be empty', abort: true })
+    // The hour summaries and the meta are found next to it by swapping this
+    // ending for `.hours.bin` and `.meta.json`, as the generator names them.
+    .endsWith('.bin', {
+      error: 'must end in .bin, so its hour summaries and meta can be found',
+    })
     .default('data/acme-2025-11.bin'),
   SWAGGER_ENABLED: z
     .stringbool({ truthy: ['true'], falsy: ['false'] })

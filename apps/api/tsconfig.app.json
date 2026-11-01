@@ -17,6 +17,7 @@
     "jest.config.cts",
     "src/**/*.spec.ts",
     "src/**/*.test.ts",
+    "src/testing/**",
     "eslint.config.js",
     "eslint.config.cjs",
     "eslint.config.mjs"
@@ -24,6 +25,9 @@
   "references": [
     {
       "path": "../../libs/shared/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/best-trade/tsconfig.lib.json"
     }
   ]
 }

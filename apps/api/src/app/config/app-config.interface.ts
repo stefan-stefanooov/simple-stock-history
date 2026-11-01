@@ -11,7 +11,9 @@ export interface AppConfig {
   /**
    * `PRICE_HISTORY_PATH`: the generated Price History file. Defaults to where
    * the generator writes it, relative to the working directory (the workspace
-   * root under `nx serve`); the container image sets it explicitly.
+   * root under `nx serve`); the container image sets it explicitly. Ends in
+   * `.bin`; the hour summaries (`.hours.bin`) and the meta (`.meta.json`) are
+   * read from next to it.
    */
   readonly priceHistoryPath: string;
   /** `SWAGGER_ENABLED`, `true` or `false`, default `true`. */

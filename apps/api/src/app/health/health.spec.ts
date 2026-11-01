@@ -4,6 +4,8 @@ import { Test } from '@nestjs/testing';
 import { PARAMS_PROVIDER_TOKEN, type Params } from 'nestjs-pino';
 import { Writable } from 'node:stream';
 import request from 'supertest';
+import type { PriceHistoryFixture } from '../../testing/price-history-fixture.interface';
+import { writePriceHistoryFixture } from '../../testing/price-history-fixture';
 import { AppModule } from '../app.module';
 import { loadConfig } from '../config/app-config';
 import { APP_CONFIG } from '../config/config.module';
@@ -21,18 +23,18 @@ const logStream = new Writable({
   },
 });
 
-/** Stands in for the Price History loader: registers a readiness check the test controls. */
-let priceHistoryLoaded = false;
+/** Registers a second readiness check, next to the Price History's, that the test controls. */
+let dependencyReady = false;
 
 @Injectable()
-class FakePriceHistoryLoader {
+class FakeDependency {
   constructor(readiness: ReadinessRegistry) {
-    readiness.register('price-history', () => priceHistoryLoaded);
+    readiness.register('fake-dependency', () => dependencyReady);
   }
 }
 
-@Module({ providers: [FakePriceHistoryLoader] })
-class FakePriceHistoryModule {}
+@Module({ providers: [FakeDependency] })
+class FakeDependencyModule {}
 
 function requestLogs(): LogLine[] {
   return logLines.filter((line) => line['msg'] === 'request completed');
@@ -50,14 +52,20 @@ async function waitForRequestLog(url: string): Promise<void> {
 
 describe('Kubernetes probes', () => {
   let app: NestExpressApplication;
+  let priceHistory: PriceHistoryFixture;
 
   beforeAll(async () => {
-    const config = loadConfig({ NODE_ENV: 'production', LOG_LEVEL: 'info' });
+    priceHistory = await writePriceHistoryFixture();
+    const config = loadConfig({
+      NODE_ENV: 'production',
+      LOG_LEVEL: 'info',
+      PRICE_HISTORY_PATH: priceHistory.paths.priceHistory,
+    });
     const params: Params = {
       pinoHttp: [createPinoHttpOptions(config), logStream],
     };
     const moduleRef = await Test.createTestingModule({
-      imports: [AppModule, FakePriceHistoryModule],
+      imports: [AppModule, FakeDependencyModule],
     })
       .overrideProvider(APP_CONFIG)
       .useValue(config)
@@ -74,11 +82,12 @@ describe('Kubernetes probes', () => {
 
   afterAll(async () => {
     await app.close();
+    await priceHistory.remove();
   });
 
   describe('GET /healthz', () => {
     it('answers 200 while the process is up, even when not ready', async () => {
-      priceHistoryLoaded = false;
+      dependencyReady = false;
 
       const response = await request(app.getHttpServer()).get('/healthz');
 
@@ -90,27 +99,27 @@ describe('Kubernetes probes', () => {
 
   describe('GET /readyz', () => {
     it('answers 503 while a readiness check fails', async () => {
-      priceHistoryLoaded = false;
+      dependencyReady = false;
 
       const response = await request(app.getHttpServer()).get('/readyz');
 
       expect(response.status).toBe(503);
       expect(response.body).toEqual({
         status: 'not ready',
-        checks: { 'price-history': 'fail' },
+        checks: { 'price-history': 'pass', 'fake-dependency': 'fail' },
       });
       expect(response.headers['cache-control']).toBe('no-store');
     });
 
     it('answers 200 once every readiness check passes', async () => {
-      priceHistoryLoaded = true;
+      dependencyReady = true;
 
       const response = await request(app.getHttpServer()).get('/readyz');
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({
         status: 'ready',
-        checks: { 'price-history': 'pass' },
+        checks: { 'price-history': 'pass', 'fake-dependency': 'pass' },
       });
       expect(response.headers['cache-control']).toBe('no-store');
     });

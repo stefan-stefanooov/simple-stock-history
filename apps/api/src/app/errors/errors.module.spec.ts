@@ -18,6 +18,8 @@ import { PARAMS_PROVIDER_TOKEN, type Params } from 'nestjs-pino';
 import { Writable } from 'node:stream';
 import request, { type Response } from 'supertest';
 import { z } from 'zod';
+import type { PriceHistoryFixture } from '../../testing/price-history-fixture.interface';
+import { writePriceHistoryFixture } from '../../testing/price-history-fixture';
 import { AppModule } from '../app.module';
 import { loadConfig } from '../config/app-config';
 import { APP_CONFIG } from '../config/config.module';
@@ -142,9 +144,15 @@ function expectProblem(response: Response, status: number) {
 
 describe('ErrorsModule', () => {
   let app: NestExpressApplication;
+  let priceHistory: PriceHistoryFixture;
 
   beforeAll(async () => {
-    const config = loadConfig({ NODE_ENV: 'production', LOG_LEVEL: 'info' });
+    priceHistory = await writePriceHistoryFixture();
+    const config = loadConfig({
+      NODE_ENV: 'production',
+      LOG_LEVEL: 'info',
+      PRICE_HISTORY_PATH: priceHistory.paths.priceHistory,
+    });
     const params: Params = {
       pinoHttp: [createPinoHttpOptions(config), logStream],
     };
@@ -166,6 +174,7 @@ describe('ErrorsModule', () => {
 
   afterAll(async () => {
     await app.close();
+    await priceHistory.remove();
   });
 
   const get = (url: string) => request(app.getHttpServer()).get(url);

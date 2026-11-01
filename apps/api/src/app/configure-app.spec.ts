@@ -5,6 +5,8 @@ import { PARAMS_PROVIDER_TOKEN, type Params } from 'nestjs-pino';
 import { EventEmitter } from 'node:events';
 import { Writable } from 'node:stream';
 import request from 'supertest';
+import type { PriceHistoryFixture } from '../testing/price-history-fixture.interface';
+import { writePriceHistoryFixture } from '../testing/price-history-fixture';
 import { AppModule } from './app.module';
 import { loadConfig } from './config/app-config';
 import { APP_CONFIG } from './config/config.module';
@@ -23,10 +25,24 @@ const logStream = new Writable({
   },
 });
 
+let priceHistory: PriceHistoryFixture;
+
+beforeAll(async () => {
+  priceHistory = await writePriceHistoryFixture();
+});
+
+afterAll(async () => {
+  await priceHistory.remove();
+});
+
 async function createApp(
   controllers: Type[] = [],
 ): Promise<NestExpressApplication> {
-  const config = loadConfig({ NODE_ENV: 'production', LOG_LEVEL: 'info' });
+  const config = loadConfig({
+    NODE_ENV: 'production',
+    LOG_LEVEL: 'info',
+    PRICE_HISTORY_PATH: priceHistory.paths.priceHistory,
+  });
   const params: Params = {
     pinoHttp: [createPinoHttpOptions(config), logStream],
   };
