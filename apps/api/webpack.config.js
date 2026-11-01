@@ -18,6 +18,11 @@ module.exports = {
       'nestjs-pino': 'commonjs nestjs-pino',
       pino: 'commonjs pino',
       'pino-http': 'commonjs pino-http',
+      // Nor @nestjs/swagger: it serves Swagger UI's files from the
+      // swagger-ui-dist package's folder, found by path. Kept external, it
+      // also does not bundle the class-validator and class-transformer
+      // requires of its mapped types, which the API does not install.
+      '@nestjs/swagger': 'commonjs @nestjs/swagger',
     },
   ],
   plugins: [

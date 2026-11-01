@@ -12,6 +12,11 @@ import { createZodDto } from 'nestjs-zod';
  * `@Query() timeSlice: BestTradeQueryDto`, and the global ZodValidationPipe
  * (`ErrorsModule`) parses the request with its schema; bad input is answered
  * with a 400 problem+json listing the issues.
+ *
+ * The same schemas describe the routes in the OpenAPI document (`swagger/`):
+ * a DTO parameter documents itself; document a success response with
+ * `@ApiOkResponse({ type: BestTradeResponseDto.Output })` and the errors a
+ * route returns on purpose with `@ApiProblemResponse(status, description)`.
  */
 
 /** `GET /api/v1/trades/best?from=&to=`: the Time Slice, decoded to numbers. */

@@ -1,13 +1,11 @@
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
+import { GLOBAL_PREFIX } from './global-prefix';
 import { PROBE_PATHS } from './health/probe-routes';
+import { setupSwagger } from './swagger/swagger';
 
-/**
- * Every API route is served under `/api`, the path Traefik routes to the API.
- * The Kubernetes probes are left out of it, so Traefik never exposes them.
- */
-export const GLOBAL_PREFIX = 'api';
+export { GLOBAL_PREFIX };
 
 /**
  * Traefik is the only proxy in front of the API, so exactly one hop is
@@ -30,6 +28,7 @@ export function configureApp(app: NestExpressApplication): void {
   // (homelab#6), so `/api` and the web app on `/` never disagree.
   app.use(helmet({ hsts: false }));
   app.setGlobalPrefix(GLOBAL_PREFIX, { exclude: [...PROBE_PATHS] });
+  setupSwagger(app);
   // On SIGTERM (Kubernetes stopping the pod) or SIGINT (Ctrl+C), Nest runs the
   // shutdown hooks and closes the HTTP server, which stops accepting
   // connections and lets in-flight requests finish. Exiting through
