@@ -1,4 +1,5 @@
 import { Controller, Get, Header, HttpStatus, Res } from '@nestjs/common';
+import { ApiExcludeController } from '@nestjs/swagger';
 import type { ServerResponse } from 'node:http';
 import { LIVENESS_PATH, READINESS_PATH } from './probe-routes';
 import { ReadinessRegistry } from './readiness-registry';
@@ -7,8 +8,10 @@ import type { ReadinessResponse } from './readiness-response.interface';
 
 /**
  * Kubernetes probes. Kept out of every cache, since a stale answer is worse
- * than none.
+ * than none. Left out of the OpenAPI document: they are not served under
+ * `/api`, so clients cannot reach them.
  */
+@ApiExcludeController()
 @Controller()
 export class HealthController {
   constructor(private readonly registry: ReadinessRegistry) {}
