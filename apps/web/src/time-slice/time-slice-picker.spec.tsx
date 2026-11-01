@@ -45,7 +45,10 @@ describe('TimeSlicePicker', () => {
     expect(screen.getByText(/All dates and times are in UTC/)).toBeTruthy();
     expect(startTime()).toHaveProperty('value', '00:00:00');
     expect(endTime()).toHaveProperty('value', '23:59:59');
-    expect(startTime()).toHaveProperty('step', '1');
+    for (const input of [startTime(), endTime()]) {
+      expect(input).toHaveProperty('type', 'text');
+      expect(input).toHaveProperty('placeholder', 'HH:MM:SS');
+    }
     expect(summary().textContent).toBe(
       'Pick the first and last day in the calendar.',
     );
@@ -251,6 +254,34 @@ describe('TimeSlicePicker', () => {
       'Enter the start time as HH:MM:SS.',
     );
     expect(startTime().getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it.each([
+    ['25:00:00', 'start', 'Enter the start time as HH:MM:SS.'],
+    ['12:00 PM', 'start', 'Enter the start time as HH:MM:SS.'],
+    ['7:30:00 PM', 'end', 'Enter the end time as HH:MM:SS.'],
+  ])('rejects %j as the %s time', (value, which, message) => {
+    const onChange = renderPicker();
+    const input = which === 'start' ? startTime() : endTime();
+
+    fireEvent.click(day('November 5th'));
+    setTime(input, value);
+
+    expect(onChange).toHaveBeenLastCalledWith(null);
+    expect(screen.getByRole('alert').textContent).toBe(message);
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('reads 24-hour times past noon', () => {
+    const onChange = renderPicker();
+
+    fireEvent.click(day('November 5th'));
+    setTime(startTime(), '13:00:00');
+    setTime(endTime(), '23:30:15');
+    expect(onChange).toHaveBeenLastCalledWith({
+      from: NOV_5 + 13 * 3600,
+      to: NOV_5 + 23 * 3600 + 30 * 60 + 15,
+    });
   });
 
   it('only reports changes of the Time Slice', () => {

@@ -24,14 +24,17 @@ export const SECONDS_PER_DAY = 86_400;
 export const DEFAULT_START_TIME = '00:00:00';
 export const DEFAULT_END_TIME = '23:59:59';
 
-/** `HH:MM:SS`, or `HH:MM` as browsers report a time input whose seconds are 0. */
-const TIME_OF_DAY = /^([01]\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?$/;
+/** A time of day on the 24-hour clock, `HH:MM:SS`. */
+const TIME_OF_DAY = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
 
-/** Seconds since midnight for a time-input value, or `null` if it isn't one. */
+/**
+ * Seconds since midnight for a time typed as 24-hour `HH:MM:SS` (surrounding
+ * spaces ignored), or `null` if it isn't one.
+ */
 export function parseTimeOfDay(value: string): number | null {
-  const match = TIME_OF_DAY.exec(value);
+  const match = TIME_OF_DAY.exec(value.trim());
   if (!match) return null;
-  const [, hours, minutes, seconds = '0'] = match;
+  const [, hours, minutes, seconds] = match;
   return Number(hours) * 3600 + Number(minutes) * 60 + Number(seconds);
 }
 

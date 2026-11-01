@@ -33,6 +33,9 @@ export interface TimeSlicePickerProps {
  * Picks a Time Slice within the Data Period: a range of days plus a start and
  * an end time to the second. Everything is UTC: the calendar shows UTC days
  * and the times are read as UTC, whatever the browser's time zone.
+ *
+ * The times are plain text fields on the 24-hour clock, `HH:MM:SS`: a native
+ * time input would show the browser's clock format, e.g. 12-hour in en-US.
  */
 export function TimeSlicePicker({
   dataPeriod,
@@ -120,8 +123,11 @@ export function TimeSlicePicker({
             <input
               id={startTimeId}
               className={TIME_INPUT_CLASS}
-              type="time"
-              step={1}
+              type="text"
+              placeholder="HH:MM:SS"
+              maxLength={8}
+              autoComplete="off"
+              spellCheck={false}
               required
               value={draft.startTime}
               onChange={(event) =>
@@ -141,8 +147,11 @@ export function TimeSlicePicker({
             <input
               id={endTimeId}
               className={TIME_INPUT_CLASS}
-              type="time"
-              step={1}
+              type="text"
+              placeholder="HH:MM:SS"
+              maxLength={8}
+              autoComplete="off"
+              spellCheck={false}
               required
               value={draft.endTime}
               onChange={(event) =>
@@ -173,7 +182,7 @@ export function TimeSlicePicker({
 }
 
 const TIME_INPUT_CLASS =
-  'w-full max-w-48 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-slate-900 shadow-xs focus:border-emerald-600 focus:outline-2 focus:outline-emerald-600/30 aria-invalid:border-red-600';
+  'w-full max-w-48 rounded-md tabular-nums border border-slate-300 bg-white px-3 py-1.5 text-slate-900 shadow-xs focus:border-emerald-600 focus:outline-2 focus:outline-emerald-600/30 aria-invalid:border-red-600';
 
 /** The UTC day of a date DayPicker reports, as the epoch second of its midnight. */
 function dayOf(date: Date) {

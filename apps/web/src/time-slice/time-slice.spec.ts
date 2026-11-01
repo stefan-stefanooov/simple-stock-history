@@ -20,17 +20,24 @@ describe('parseTimeOfDay', () => {
     ['00:00:00', 0],
     ['23:59:59', 86_399],
     ['12:34:56', 45_296],
-    ['09:30', 34_200],
+    [' 08:15:00 ', 29_700],
   ])('reads %s as %i seconds after midnight', (value, seconds) => {
     expect(parseTimeOfDay(value)).toBe(seconds);
   });
 
-  it.each(['', '24:00:00', '12:60:00', '12:00:60', '1:00:00', '12:00:00.5'])(
-    'rejects %j',
-    (value) => {
-      expect(parseTimeOfDay(value)).toBeNull();
-    },
-  );
+  it.each([
+    '',
+    '24:00:00',
+    '12:60:00',
+    '12:00:60',
+    '1:00:00',
+    '12:00:00.5',
+    '09:30',
+    '12:00:00 PM',
+    '12:00 AM',
+  ])('rejects %j', (value) => {
+    expect(parseTimeOfDay(value)).toBeNull();
+  });
 });
 
 describe('utcDayStart', () => {
