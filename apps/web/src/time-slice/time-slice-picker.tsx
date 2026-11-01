@@ -8,11 +8,11 @@ import {
   toTimeSlice,
   utcDayStart,
   type DataPeriod,
-  type TimeSlice,
-  type TimeSliceDraft,
   type TimeSliceProblem,
   type TimeSliceResult,
 } from './time-slice';
+import type { TimeSliceDraft } from './time-slice-draft.interface';
+import type { TimeSlice } from './time-slice.interface';
 
 export interface TimeSlicePickerProps {
   /**

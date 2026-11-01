@@ -1,5 +1,6 @@
 import { Global, Module } from '@nestjs/common';
-import { type AppConfig, loadConfig } from './app-config';
+import { loadConfig } from './app-config';
+import type { AppConfig } from './app-config.interface';
 
 /**
  * Injection token for the {@link AppConfig}:

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { LoggerModule, type Params } from 'nestjs-pino';
-import type { AppConfig } from '../config/app-config';
+import type { AppConfig } from '../config/app-config.interface';
 import { APP_CONFIG } from '../config/config.module';
 import { createPinoHttpOptions } from './pino-http-options';
 

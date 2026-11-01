@@ -1,5 +1,5 @@
 import nx from '@nx/eslint-plugin';
-import local from './eslint-rules/one-interface-per-file.mjs';
+import local from './tools/lint-rules/src/one-interface-per-file.mjs';
 
 export default [
   ...nx.configs['flat/base'],
@@ -46,8 +46,11 @@ export default [
     rules: {},
   },
   {
-    // The repo's own rules. A project turns them on in its eslint.config.mjs.
+    // The repo's own rules, from tools/lint-rules.
     files: ['**/*.ts', '**/*.tsx', '**/*.cts', '**/*.mts'],
     plugins: { local },
+    rules: {
+      'local/one-interface-per-file': 'error',
+    },
   },
 ];

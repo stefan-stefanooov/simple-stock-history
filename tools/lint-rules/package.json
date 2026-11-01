@@ -1,0 +1,14 @@
+{
+  "name": "@simple-stock-history/lint-rules",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./one-interface-per-file": "./src/one-interface-per-file.mjs",
+    "./package.json": "./package.json"
+  },
+  "nx": {
+    "name": "lint-rules"
+  },
+  "dependencies": {}
+}

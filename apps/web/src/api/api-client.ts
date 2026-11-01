@@ -9,15 +9,9 @@ import {
   type PeriodResponse,
   type ProblemDetails,
 } from '@simple-stock-history/shared';
-
-/** Options every request accepts. */
-export interface RequestOptions {
-  /**
-   * Cancels the request. The promise then rejects with the signal's reason
-   * (an `AbortError` by default), never with an {@link ApiError}.
-   */
-  signal?: AbortSignal;
-}
+import type { RequestOptions } from './request-options.interface';
+import type { Issue } from './issue.interface';
+import type { ResponseSchema } from './response-schema.interface';
 
 /**
  * Any failure to get an answer from the API that matches the shared
@@ -117,24 +111,6 @@ export async function getBestTrade(
     BestTradeResponseSchema,
     options,
   );
-}
-
-/** One thing wrong with a value, as both zod and `ProblemDetails` report it. */
-interface Issue {
-  readonly path: readonly PropertyKey[];
-  readonly message: string;
-}
-
-/**
- * The part of a zod schema the client needs, so the web app gets by without
- * depending on zod itself.
- */
-interface ResponseSchema<T> {
-  safeParse(
-    data: unknown,
-  ):
-    | { success: true; data: T }
-    | { success: false; error: { issues: readonly Issue[] } };
 }
 
 const ACCEPT = `application/json, ${PROBLEM_JSON_MEDIA_TYPE}`;

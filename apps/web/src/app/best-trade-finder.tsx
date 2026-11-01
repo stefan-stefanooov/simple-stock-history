@@ -11,8 +11,8 @@ import {
   QueryFailed,
   QueryInProgress,
   QueryPlaceholder,
-  type QueryResult,
 } from './best-trade-result';
+import type { QueryResult } from './query-result.interface';
 import { errorMessage } from './error-message';
 
 export interface BestTradeFinderProps {

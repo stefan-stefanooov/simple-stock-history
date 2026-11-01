@@ -1,24 +1,11 @@
 import { assertIntegerInRange } from './assert-integer.ts';
 import { mulberry32 } from './mulberry32.ts';
+import type { PriceWalkOptions } from './price-walk-options.interface.ts';
 
 // Every value below is an integer well inside ±2^53, so each +, −, % and
 // comparison is exact and gives the same result on every engine (ADR-0001).
 const INT32_MAX = 0x7fff_ffff;
 const UINT32_COUNT = 0x1_0000_0000;
-
-/** Everything that determines a generated Price History. */
-export interface PriceWalkOptions {
-  /** PRNG seed, an unsigned 32-bit integer. */
-  seed: number;
-  /** Number of Price Points to produce, one per second. */
-  count: number;
-  /** Price of the first Price Point, in cents. */
-  startPriceCents: number;
-  /** Each step is drawn uniformly from −maxStepCents…+maxStepCents. */
-  maxStepCents: number;
-  /** Lowest price allowed, in cents. A step that would go below it is reflected. */
-  floorPriceCents: number;
-}
 
 /**
  * Generates the price, in cents, of each consecutive Price Point.

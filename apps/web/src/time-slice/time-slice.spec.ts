@@ -1,9 +1,5 @@
-import {
-  parseTimeOfDay,
-  toTimeSlice,
-  utcDayStart,
-  type TimeSliceDraft,
-} from './time-slice';
+import { parseTimeOfDay, toTimeSlice, utcDayStart } from './time-slice';
+import type { TimeSliceDraft } from './time-slice-draft.interface';
 
 // November 2025 UTC, as served by GET /api/v1/period
 const NOVEMBER = { from: 1761955200, to: 1764547199 };
