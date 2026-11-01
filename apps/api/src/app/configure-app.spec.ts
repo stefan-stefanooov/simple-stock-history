@@ -2,6 +2,7 @@ import { Controller, Get, type Type } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import { PARAMS_PROVIDER_TOKEN, type Params } from 'nestjs-pino';
+import { EventEmitter } from 'node:events';
 import { Writable } from 'node:stream';
 import request from 'supertest';
 import { AppModule } from './app.module';
@@ -197,7 +198,14 @@ describe('graceful shutdown', () => {
       .then((response) => response);
     await slowRequestArrived.fired;
 
-    process.emit('SIGTERM');
+    // Jest gives each test file its own copy of `process`, with its own
+    // listeners, but copies `process.emit` over from the worker's real process.
+    // Once an earlier test file in the same worker has loaded `@nx/js` (the nx
+    // Jest resolver does that on a fallback resolution), the real `emit` is nx's
+    // wrapper, which forwards to the real process and so never reaches the
+    // listener Nest registered here. Dispatching through EventEmitter directly
+    // makes the test independent of which files ran before it in the worker.
+    EventEmitter.prototype.emit.call(process, 'SIGTERM');
 
     await eventually(() => !app?.getHttpServer().listening);
     await expect(request(url).get('/api')).rejects.toThrow(/ECONNREFUSED/);
