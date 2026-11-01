@@ -1,6 +1,9 @@
 // Every interface lives in its own file, named after it:
 // `interface TradePositions` goes in `trade-positions.interface.ts`, and that
 // file declares nothing but the interface (imports are allowed).
+//
+// Exception: a React component's props interface (`*Props` in a `.tsx` file)
+// stays next to its component. The rule ignores it.
 
 /** `TradePositions` → `trade-positions`, `HTTPClient` → `http-client`. */
 function toKebabCase(name) {
@@ -23,13 +26,18 @@ function declaredInterface(statement) {
   return null;
 }
 
+/** Whether `declaration` is a React component's props interface. */
+function isComponentProps(declaration, fileName) {
+  return fileName.endsWith('.tsx') && declaration.id.name.endsWith('Props');
+}
+
 /** @type {import('eslint').Rule.RuleModule} */
 export const oneInterfacePerFile = {
   meta: {
     type: 'suggestion',
     docs: {
       description:
-        'Require every interface to be in its own `<kebab-name>.interface.ts` file that declares nothing else',
+        'Require every interface, except React props in `.tsx` files, to be in its own `<kebab-name>.interface.ts` file that declares nothing else',
     },
     schema: [],
     messages: {
@@ -43,10 +51,12 @@ export const oneInterfacePerFile = {
   create(context) {
     return {
       Program(program) {
+        const fileName = context.filename.split(/[\\/]/).pop();
         const interfaces = [];
         const others = [];
         for (const statement of program.body) {
           const declaration = declaredInterface(statement);
+          if (declaration && isComponentProps(declaration, fileName)) continue;
           if (declaration) interfaces.push(declaration);
           else if (statement.type !== 'ImportDeclaration')
             others.push(statement);
@@ -56,7 +66,6 @@ export const oneInterfacePerFile = {
         const [first, ...extra] = interfaces;
         const name = first.id.name;
         const expected = `${toKebabCase(name)}.interface.ts`;
-        const fileName = context.filename.split(/[\\/]/).pop();
 
         if (fileName !== expected) {
           context.report({

@@ -2,11 +2,8 @@ import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app/app.module';
-import {
-  type AppConfig,
-  InvalidConfigError,
-  loadConfig,
-} from './app/config/app-config';
+import { InvalidConfigError, loadConfig } from './app/config/app-config';
+import type { AppConfig } from './app/config/app-config.interface';
 import { configureApp, GLOBAL_PREFIX } from './app/configure-app';
 
 async function bootstrap(): Promise<void> {

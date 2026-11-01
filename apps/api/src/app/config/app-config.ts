@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { AppConfig } from './app-config.interface';
 
 /** pino's levels, plus `silent` to turn logging off. */
 export const LOG_LEVELS = [
@@ -14,24 +15,6 @@ export const LOG_LEVELS = [
 export type LogLevel = (typeof LOG_LEVELS)[number];
 
 export type NodeEnv = 'development' | 'production' | 'test';
-
-/** The API's settings, read once from the environment at startup. */
-export interface AppConfig {
-  /** `NODE_ENV`, default `production`. Only `development` pretty-prints logs. */
-  readonly nodeEnv: NodeEnv;
-  /** `PORT`, default 3000. */
-  readonly port: number;
-  /** `LOG_LEVEL`, default `info` (`silent` under `NODE_ENV=test`). */
-  readonly logLevel: LogLevel;
-  /**
-   * `PRICE_HISTORY_PATH`: the generated Price History file. Defaults to where
-   * the generator writes it, relative to the working directory (the workspace
-   * root under `nx serve`); the container image sets it explicitly.
-   */
-  readonly priceHistoryPath: string;
-  /** `SWAGGER_ENABLED`, `true` or `false`, default `true`. */
-  readonly swaggerEnabled: boolean;
-}
 
 const PORT_ERROR = 'must be a whole number from 1 to 65535';
 

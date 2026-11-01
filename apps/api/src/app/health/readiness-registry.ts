@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import type { ReadinessReport } from './readiness-report.interface';
 
 /**
  * Answers whether one part of the API can serve requests yet. Resolving to
@@ -9,12 +10,6 @@ import { Injectable, Logger } from '@nestjs/common';
 export type ReadinessCheck = () => boolean | Promise<boolean>;
 
 export type ReadinessCheckResult = 'pass' | 'fail';
-
-export interface ReadinessReport {
-  /** True when every registered readiness check passes. */
-  ready: boolean;
-  checks: Record<string, ReadinessCheckResult>;
-}
 
 /**
  * The readiness checks behind `GET /readyz`. The API is ready when every

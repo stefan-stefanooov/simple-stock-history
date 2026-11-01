@@ -1,24 +1,9 @@
 import type { ReactNode } from 'react';
-import type {
-  EpochSeconds,
-  PricePoint,
-  Trade,
-} from '@simple-stock-history/shared';
+import type { EpochSeconds, PricePoint } from '@simple-stock-history/shared';
 import { formatUtcDateTime, toIsoUtcDateTime } from '../date-time';
-import { formatShares, formatUsd, type TradeOutcome } from '../funds';
+import { formatShares, formatUsd } from '../funds';
 import type { TimeSlice } from '../time-slice';
-
-/**
- * What one press of "Find best trade" found, with what it was asked: the Time
- * Slice the API searched and the Available Funds, in cents, entered at the
- * time. Changing the inputs afterwards does not change it.
- */
-export interface QueryResult {
-  timeSlice: TimeSlice;
-  fundsCents: number;
-  /** The Best Trade and what the Available Funds make on it; `null` for No Profitable Trade. */
-  bestTrade: { trade: Trade; outcome: TradeOutcome } | null;
-}
+import type { QueryResult } from './query-result.interface';
 
 export interface BestTradeResultProps {
   result: QueryResult;

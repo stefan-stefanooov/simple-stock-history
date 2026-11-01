@@ -1,4 +1,5 @@
-export type { DataPeriod, TimeSlice } from './time-slice';
+export type { DataPeriod } from './time-slice';
+export type { TimeSlice } from './time-slice.interface';
 export {
   TimeSlicePicker,
   type TimeSlicePickerProps,

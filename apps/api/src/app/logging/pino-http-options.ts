@@ -1,22 +1,9 @@
-import type {
-  IncomingHttpHeaders,
-  IncomingMessage,
-  ServerResponse,
-} from 'node:http';
+import type { IncomingMessage, ServerResponse } from 'node:http';
 import { type LevelWithSilent, stdTimeFunctions } from 'pino';
 import type { Options } from 'pino-http';
-import type { AppConfig } from '../config/app-config';
+import type { AppConfig } from '../config/app-config.interface';
 import { isProbeRequest } from '../health/probe-routes';
-
-/** What pino-http hands a custom `req` serializer: pino's standard fields, plus the raw request. */
-interface StdSerializedRequest {
-  id: unknown;
-  method: string;
-  url: string;
-  headers: IncomingHttpHeaders;
-  remoteAddress?: string;
-  raw: IncomingMessage & { ip?: string };
-}
+import type { StdSerializedRequest } from './std-serialized-request.interface';
 
 /**
  * Keeps request logs to what is worth storing. `remoteAddress` is Express's

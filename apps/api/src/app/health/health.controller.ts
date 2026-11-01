@@ -1,19 +1,9 @@
 import { Controller, Get, Header, HttpStatus, Res } from '@nestjs/common';
 import type { ServerResponse } from 'node:http';
 import { LIVENESS_PATH, READINESS_PATH } from './probe-routes';
-import {
-  type ReadinessCheckResult,
-  ReadinessRegistry,
-} from './readiness-registry';
-
-export interface LivenessResponse {
-  status: 'ok';
-}
-
-export interface ReadinessResponse {
-  status: 'ready' | 'not ready';
-  checks: Record<string, ReadinessCheckResult>;
-}
+import { ReadinessRegistry } from './readiness-registry';
+import type { LivenessResponse } from './liveness-response.interface';
+import type { ReadinessResponse } from './readiness-response.interface';
 
 /**
  * Kubernetes probes. Kept out of every cache, since a stale answer is worse

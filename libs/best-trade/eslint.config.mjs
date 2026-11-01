@@ -5,10 +5,4 @@ export default [
   {
     ignores: ['**/out-tsc'],
   },
-  {
-    files: ['**/*.ts'],
-    rules: {
-      'local/one-interface-per-file': 'error',
-    },
-  },
 ];

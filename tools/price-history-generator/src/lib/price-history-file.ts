@@ -1,27 +1,7 @@
 import { createHash } from 'node:crypto';
-import type { PriceHistoryConfig } from './price-history-config.ts';
+import type { PriceHistoryConfig } from './price-history-config.interface.ts';
+import type { PriceHistoryFile } from './price-history-file.interface.ts';
 import { generatePriceHistory } from './price-walk.ts';
-
-/** Contents of the `.meta.json` file written next to the Price History. */
-export interface PriceHistoryMeta {
-  /** First second of the Data Period, in Unix epoch seconds (UTC). */
-  dataPeriodStart: number;
-  /** Number of Price Points, one per second from `dataPeriodStart`. */
-  count: number;
-  /** PRNG seed the Price History was generated from. */
-  seed: number;
-  /** `version` of the price-history-generator package that wrote the file. */
-  generatorVersion: string;
-  /** sha256 of the `.bin` file, in lowercase hex. */
-  sha256: string;
-}
-
-/** A generated Price History, ready to be written to disk. */
-export interface PriceHistoryFile {
-  /** The `.bin` file: each Price Point's price in cents, Int32 little-endian. */
-  bytes: Uint8Array;
-  meta: PriceHistoryMeta;
-}
 
 /**
  * Generates the Price History a config describes and encodes it as the `.bin`
