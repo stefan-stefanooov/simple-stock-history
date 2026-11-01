@@ -3,7 +3,7 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { parsePriceHistoryConfig } from './price-history-config.ts';
-import { generatePriceHistoryFile } from './price-history-file.ts';
+import { generatePriceHistoryFiles } from './price-history-files.ts';
 
 /** The committed config that pins the Share's Price History. */
 export const DEFAULT_CONFIG_PATH = fileURLToPath(
@@ -18,14 +18,16 @@ const PACKAGE_JSON_PATH = fileURLToPath(
 
 const USAGE = `Usage: node tools/price-history-generator/src/main.ts [options]
 
-Generates the Share's Price History from its committed config, checks its
-sha256 against the one pinned there, then writes the .bin file and, next to
-it, a .meta.json file. Writes nothing and exits 1 if the sha256 differs.
+Generates the Share's Price History and its hour summaries from the committed
+config and checks both sha256 values against the ones pinned there. Then
+writes the .bin file and, next to it, a .hours.bin and a .meta.json file.
+Writes nothing and exits 1 if either sha256 differs.
 
 Options:
   --config <path>  Config file (default: ${DEFAULT_CONFIG_PATH})
-  --out <path>     Price History file, must end in .bin; the meta goes to
-                   the same path ending in .meta.json
+  --out <path>     Price History file, must end in .bin; the hour summaries
+                   and the meta go to the same path ending in .hours.bin
+                   and .meta.json
                    (default: ${DEFAULT_OUT_PATH})
   --help           Show this help`;
 
@@ -57,29 +59,49 @@ export function runCli(args: readonly string[]): number {
   if (!options.out.endsWith('.bin')) {
     return fail(`--out must end in .bin, got ${options.out}`);
   }
+  const hourSummariesPath = options.out.replace(/\.bin$/, '.hours.bin');
   const metaPath = options.out.replace(/\.bin$/, '.meta.json');
 
   try {
     const config = parsePriceHistoryConfig(readJson(options.config));
     const { version } = readJson(PACKAGE_JSON_PATH) as { version: string };
-    const { bytes, meta } = generatePriceHistoryFile(config, version);
+    const { priceHistory, hourSummaries, meta } = generatePriceHistoryFiles(
+      config,
+      version,
+    );
 
-    if (meta.sha256 !== config.sha256) {
+    const mismatches = [
+      ['Price History', 'sha256', config.sha256, meta.sha256],
+      [
+        'hour summaries',
+        'hourSummariesSha256',
+        config.hourSummariesSha256,
+        meta.hourSummariesSha256,
+      ],
+    ].filter(([, , expected, actual]) => expected !== actual);
+    if (mismatches.length > 0) {
       return fail(
         [
-          'The generated Price History does not match the pinned sha256.',
-          `  expected (${options.config}): ${config.sha256}`,
-          `  actual: ${meta.sha256}`,
-          'If you changed the generator or its config on purpose, pin the actual sha256 in the config.',
+          ...mismatches.flatMap(([file, field, expected, actual]) => [
+            `The sha256 of the generated ${file} does not match the pinned ${field}.`,
+            `  expected (${options.config}): ${expected}`,
+            `  actual: ${actual}`,
+          ]),
+          'Nothing was written. If you changed the generator, libs/best-trade or the config on purpose, pin the actual sha256 in the config.',
         ].join('\n'),
       );
     }
 
     mkdirSync(dirname(options.out), { recursive: true });
-    writeFileSync(options.out, bytes);
+    writeFileSync(options.out, priceHistory);
+    writeFileSync(hourSummariesPath, hourSummaries);
     writeFileSync(metaPath, `${JSON.stringify(meta, null, 2)}\n`);
     console.log(
-      `Wrote ${meta.count} Price Points to ${options.out} and ${metaPath} (sha256 ${meta.sha256})`,
+      [
+        `Wrote ${meta.count} Price Points to ${options.out} (sha256 ${meta.sha256}),`,
+        `their hour summaries (hour length ${meta.hourLength}) to ${hourSummariesPath} (sha256 ${meta.hourSummariesSha256})`,
+        `and the meta to ${metaPath}`,
+      ].join('\n'),
     );
     return 0;
   } catch (error) {
