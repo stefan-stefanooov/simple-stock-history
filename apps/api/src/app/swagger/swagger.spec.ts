@@ -13,6 +13,8 @@ import {
   ProblemDetailsSchema,
 } from '@simple-stock-history/shared';
 import request from 'supertest';
+import type { PriceHistoryFixture } from '../../testing/price-history-fixture.interface';
+import { writePriceHistoryFixture } from '../../testing/price-history-fixture';
 import { AppModule } from '../app.module';
 import { loadConfig } from '../config/app-config';
 import { APP_CONFIG } from '../config/config.module';
@@ -45,6 +47,16 @@ class DocumentedController {
   }
 }
 
+let priceHistory: PriceHistoryFixture;
+
+beforeAll(async () => {
+  priceHistory = await writePriceHistoryFixture();
+});
+
+afterAll(async () => {
+  await priceHistory.remove();
+});
+
 async function createApp(
   env: Record<string, string>,
 ): Promise<NestExpressApplication> {
@@ -53,7 +65,13 @@ async function createApp(
     controllers: [DocumentedController],
   })
     .overrideProvider(APP_CONFIG)
-    .useValue(loadConfig({ NODE_ENV: 'test', ...env }))
+    .useValue(
+      loadConfig({
+        NODE_ENV: 'test',
+        PRICE_HISTORY_PATH: priceHistory.paths.priceHistory,
+        ...env,
+      }),
+    )
     .compile();
   const app = moduleRef.createNestApplication<NestExpressApplication>({
     bufferLogs: true,
@@ -167,6 +185,42 @@ describe('Swagger docs, SWAGGER_ENABLED=true', () => {
     ] as { properties: Record<string, unknown> };
     expect(Object.keys(schema.properties).sort()).toEqual(
       ['currency', 'from', 'to', 'trade'].sort(),
+    );
+  });
+
+  it('documents GET /api/v1/period with the shared zod schema', () => {
+    const period = operation('/api/v1/period');
+
+    expect(period?.summary).toBe(
+      'The Share and the Data Period its Price History covers',
+    );
+    expect(period?.parameters ?? []).toEqual([]);
+    expect(period?.responses['200']).toMatchObject({
+      content: {
+        'application/json': {
+          schema: { $ref: '#/components/schemas/PeriodResponseDto_Output' },
+        },
+      },
+    });
+    expect(period?.responses['400']).toBeUndefined();
+    expect(period?.responses['500']).toMatchObject({
+      content: PROBLEM_CONTENT,
+    });
+
+    const schema = document.components?.schemas?.[
+      'PeriodResponseDto_Output'
+    ] as { properties: Record<string, unknown>; required: string[] };
+    expect(schema.properties).toMatchObject({
+      share: { const: 'ACME' },
+      from: { type: 'integer', description: 'First second of the Data Period' },
+      to: {
+        type: 'integer',
+        description: 'Last second of the Data Period, included',
+      },
+      currency: { const: 'USD' },
+    });
+    expect(schema.required.sort()).toEqual(
+      ['currency', 'from', 'share', 'to'].sort(),
     );
   });
 

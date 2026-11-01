@@ -59,6 +59,14 @@ describe('loadConfig', () => {
     );
   });
 
+  it('rejects a PRICE_HISTORY_PATH that does not end in .bin', () => {
+    expect(() =>
+      loadConfig({ PRICE_HISTORY_PATH: 'data/acme-2025-11.meta.json' }),
+    ).toThrow(
+      'PRICE_HISTORY_PATH: must end in .bin, so its hour summaries and meta can be found',
+    );
+  });
+
   it('lists every invalid variable in one readable message', () => {
     const load = () =>
       loadConfig({
