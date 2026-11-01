@@ -1,7 +1,7 @@
 import { Controller, Get, Header, HttpStatus, Res } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import type { ServerResponse } from 'node:http';
-import { LIVENESS_PATH, READINESS_PATH } from './probe-routes';
+import { LIVENESS_PATH, READINESS_PATH } from '../internal-routes';
 import { ReadinessRegistry } from './readiness-registry';
 import type { LivenessResponse } from './liveness-response.interface';
 import type { ReadinessResponse } from './readiness-response.interface';

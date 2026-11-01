@@ -2,7 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { type LevelWithSilent, stdTimeFunctions } from 'pino';
 import type { Options } from 'pino-http';
 import type { AppConfig } from '../config/app-config.interface';
-import { isProbeRequest } from '../health/probe-routes';
+import { isInternalRequest } from '../internal-routes';
 import type { StdSerializedRequest } from './std-serialized-request.interface';
 
 /**
@@ -44,9 +44,10 @@ export function createPinoHttpOptions(config: AppConfig): Options {
     level: config.logLevel,
     customLogLevel: requestLogLevel,
     serializers: { req: serializeRequest, res: serializeResponse },
-    // The kubelet probes every few seconds; logging that would drown the
-    // real requests. The readiness registry logs readiness changes instead.
-    autoLogging: { ignore: (req) => isProbeRequest(req.url) },
+    // The kubelet probes and Prometheus scrapes every few seconds; logging
+    // that would drown the real requests. The readiness registry logs
+    // readiness changes instead.
+    autoLogging: { ignore: (req) => isInternalRequest(req.url) },
   };
 
   if (config.nodeEnv === 'development') {

@@ -6,6 +6,7 @@ import { ConfigModule } from './config/config.module';
 import { ErrorsModule } from './errors/errors.module';
 import { HealthModule } from './health/health.module';
 import { LoggingModule } from './logging/logging.module';
+import { MetricsModule } from './metrics/metrics.module';
 import { PriceHistoryModule } from './price-history/price-history.module';
 
 @Module({
@@ -14,6 +15,7 @@ import { PriceHistoryModule } from './price-history/price-history.module';
     LoggingModule,
     ErrorsModule,
     HealthModule,
+    MetricsModule,
     PriceHistoryModule,
     BestTradeModule,
   ],

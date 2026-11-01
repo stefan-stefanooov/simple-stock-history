@@ -2,7 +2,8 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
 import { GLOBAL_PREFIX } from './global-prefix';
-import { PROBE_PATHS } from './health/probe-routes';
+import { INTERNAL_PATHS } from './internal-routes';
+import { HttpMetrics } from './metrics/http-metrics';
 import { setupSwagger } from './swagger/swagger';
 
 export { GLOBAL_PREFIX };
@@ -27,7 +28,9 @@ export function configureApp(app: NestExpressApplication): void {
   // HSTS is set once for the whole host by Traefik, which terminates TLS
   // (homelab#6), so `/api` and the web app on `/` never disagree.
   app.use(helmet({ hsts: false }));
-  app.setGlobalPrefix(GLOBAL_PREFIX, { exclude: [...PROBE_PATHS] });
+  // Ahead of every route, so it sees each request and the route that answered it
+  app.use(app.get(HttpMetrics).middleware);
+  app.setGlobalPrefix(GLOBAL_PREFIX, { exclude: [...INTERNAL_PATHS] });
   setupSwagger(app);
   // On SIGTERM (Kubernetes stopping the pod) or SIGINT (Ctrl+C), Nest runs the
   // shutdown hooks and closes the HTTP server, which stops accepting

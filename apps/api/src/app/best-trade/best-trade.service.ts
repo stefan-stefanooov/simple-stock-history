@@ -18,6 +18,7 @@ import {
 import { InvalidRequestException } from '../errors/invalid-request.exception';
 import type { DataPeriod } from '../price-history/data-period.interface';
 import { PriceHistory } from '../price-history/price-history';
+import { BestTradeMetrics } from './best-trade-metrics';
 import { BEST_TRADE_SEARCH } from './best-trade-search.provider';
 
 /** The `issues` message for a `from` or `to` outside the Data Period. */
@@ -41,6 +42,7 @@ export class BestTradeService {
   constructor(
     private readonly priceHistory: PriceHistory,
     @Inject(BEST_TRADE_SEARCH) private readonly search: BestTradeSearch,
+    private readonly metrics: BestTradeMetrics,
   ) {}
 
   /**
@@ -54,9 +56,9 @@ export class BestTradeService {
    */
   find({ from, to }: BestTradeQuery): BestTradeResponse {
     this.checkTimeSlice(from, to);
-    const positions = this.search.find(
-      this.positionOf(from),
-      this.positionOf(to),
+    this.metrics.recordTimeSlice(from, to);
+    const positions = this.metrics.timeSearch(() =>
+      this.search.find(this.positionOf(from), this.positionOf(to)),
     );
     return {
       from,

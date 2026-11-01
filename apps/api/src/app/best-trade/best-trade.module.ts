@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PriceHistoryModule } from '../price-history/price-history.module';
+import { BestTradeMetrics } from './best-trade-metrics';
 import { bestTradeSearchProvider } from './best-trade-search.provider';
 import { BestTradeController } from './best-trade.controller';
 import { BestTradeService } from './best-trade.service';
@@ -13,7 +14,7 @@ import { BestTradeService } from './best-trade.service';
 @Module({
   imports: [PriceHistoryModule],
   controllers: [BestTradeController],
-  providers: [bestTradeSearchProvider, BestTradeService],
+  providers: [bestTradeSearchProvider, BestTradeMetrics, BestTradeService],
   exports: [bestTradeSearchProvider.provide, PriceHistoryModule],
 })
 export class BestTradeModule {}
