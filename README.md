@@ -6,6 +6,12 @@
 
 Finds the **Best Trade** for the fictional Share `ACME`: given a Time Slice of its Price History, when to buy and when to sell for the highest Profit. The Price History has one Price Point per second for all of November 2025 (UTC). The API finds the Best Trade; the web app lets you pick a Time Slice, enter your Available Funds and see the outcome. It runs at `https://stocks.lan` on the homelab.
 
+## Sneak preview
+
+![The web app: a calendar and time fields for the Time Slice, Available Funds, and the Best Trade it found](docs/web-preview.png)
+
+3 to 14 November, 09:00:00 to 17:00:00 UTC, with $10,000: buy 122 shares at $81.86, sell them at $144.12, for a Profit of $7,595.72.
+
 ## How it works
 
 ```mermaid
