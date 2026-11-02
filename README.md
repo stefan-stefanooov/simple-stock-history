@@ -22,6 +22,16 @@ Finds the **Best Trade** for the fictional Share `ACME`: given a Time Slice of i
 - **Web:** Time Slice picker to the second (UTC), Available Funds, and the result in whole shares and USD, worked out in the browser.
 - **Runs on:** the homelab k3s cluster, deployed by Argo CD, watched in Grafana. [Operations](docs/operations.md)
 
+## Observability
+
+Everything is in Grafana (`https://grafana.lan`) on the homelab. Dashboard, alerts and scrape config live in the [homelab repo](https://github.com/stefan-stefanooov/homelab/tree/main/workloads/stock-history).
+
+- **Metrics:** the api serves Prometheus metrics at `/metrics`, inside the cluster only: requests and latency by route and status, Best Trade search time, Time Slice length, and Node.js process metrics. [Metrics](docs/api.md#metrics)
+- **Errors:** counted by status code. The 5xx ratio has a panel and an alert; 4xx show per route and status; 429s from the rate limit are counted by Traefik.
+- **Dashboard:** request rate, p95 latency, 5xx ratio, search time, Time Slice length, 429s, restarts, CPU and memory against limits, and the api's logs. [Operations](docs/operations.md#dashboards-logs-and-alerts)
+- **Alerts:** api down, more than 5% 5xx, p95 above 500 ms; tested with promtool. No notification channel yet.
+- **Logs:** one JSON line per request (pino), `warn` for 4xx and `error` for 5xx, shipped to Loki by Alloy and kept 7 days. [Logs](docs/api.md#logs)
+
 ## Layout
 
 An [Nx](https://nx.dev) workspace with pnpm:
@@ -59,7 +69,7 @@ Setup details, configuration, tests and container images: [Development](docs/dev
 | [ADR-0002: Best Trade search uses hour summaries](docs/adr/0002-best-trade-search-uses-hour-summaries.md) | Why the search uses hour summaries, and the options that were rejected                                                                                                        |
 | [How the Best Trade search works](docs/best-trade-search.md)                                              | The algorithm step by step, with a worked example                                                                                                                             |
 | [Best Trade search alternatives](docs/best-trade-alternatives/README.md)                                  | The options measured against each other, with charts                                                                                                                          |
-| [API](docs/api.md)                                                                                        | Routes, errors, caching, health and metrics endpoints                                                                                                                         |
+| [API](docs/api.md)                                                                                        | Routes, errors, caching, health endpoints, the metrics and logs it exports                                                                                                    |
 
 ### Development and deployment
 
