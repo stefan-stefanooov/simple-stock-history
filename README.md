@@ -55,6 +55,8 @@ Setup details, configuration, tests and container images: [Development](docs/dev
 
 ## Docs
 
+### Assignment and design
+
 | Doc                                                                      | Read it for                                                         |
 | ------------------------------------------------------------------------ | ------------------------------------------------------------------- |
 | [ASSIGNMENT.md](ASSIGNMENT.md)                                           | The assignment this answers                                         |
@@ -63,10 +65,24 @@ Setup details, configuration, tests and container images: [Development](docs/dev
 | [docs/adr](docs/adr)                                                     | The decisions behind the design                                     |
 | [How the Best Trade search works](docs/best-trade-search.md)             | The algorithm step by step, with a worked example                   |
 | [Best Trade search alternatives](docs/best-trade-alternatives/README.md) | The options measured against each other, with charts                |
-| [Development](docs/development.md)                                       | Setup, running, configuration, tests, CI, container images          |
 | [API](docs/api.md)                                                       | Routes, errors, caching, health and metrics endpoints               |
-| [Operations](docs/operations.md)                                         | Deploy, rollback, dashboards, logs, alerts, rate limit              |
-| [Releasing](docs/releasing.md)                                           | Cutting a release to GHCR                                           |
+
+### Development and deployment
+
+| Doc                                | Read it for                                                |
+| ---------------------------------- | ---------------------------------------------------------- |
+| [Development](docs/development.md) | Setup, running, configuration, tests, CI, container images |
+| [Releasing](docs/releasing.md)     | Cutting a release to GHCR                                  |
+| [Operations](docs/operations.md)   | Deploy, rollback, dashboards, logs, alerts, rate limit     |
+
+### For coding agents
+
+| Doc                                           | Read it for                                                                  |
+| --------------------------------------------- | ---------------------------------------------------------------------------- |
+| [CLAUDE.md](CLAUDE.md)                        | How to work an issue, commit sign-off, where the agent docs are              |
+| [Issue tracker](docs/agents/issue-tracker.md) | Working with GitHub issues via `gh`: conventions, reading an issue's context |
+| [Triage labels](docs/agents/triage-labels.md) | The triage roles mapped to this repo's labels                                |
+| [Domain docs](docs/agents/domain.md)          | Which domain docs (glossary, ADRs) to read before exploring the code         |
 
 ## Contributing
 
