@@ -19,4 +19,23 @@ Outside `/api`, for the cluster only (Traefik routes only `/api` to the API, so 
 | `GET /readyz`  | Readiness: 200 once the Price History is loaded and verified, otherwise 503                              |
 | `GET /metrics` | Prometheus metrics: Node.js process metrics, HTTP requests, Best Trade search time and Time Slice length |
 
-The API logs one JSON line per request with pino (probes and scrapes are left out).
+## Metrics
+
+`GET /metrics` serves these in the Prometheus text format; Prometheus scrapes it every 30 seconds as `job="stock-history-api"`:
+
+| Metric                                 | Type      | Labels                           | Measures                                                                                    |
+| -------------------------------------- | --------- | -------------------------------- | ------------------------------------------------------------------------------------------- |
+| `http_requests_total`                  | counter   | `method`, `route`, `status_code` | Requests answered. Errors are the 4xx and 5xx values of `status_code`                       |
+| `http_request_duration_seconds`        | histogram | `method`, `route`, `status_code` | Time from receiving a request to sending its response                                       |
+| `best_trade_search_duration_seconds`   | histogram |                                  | Time the Best Trade search takes for one Time Slice, buckets from 5 µs to 10 ms             |
+| `best_trade_time_slice_length_seconds` | histogram |                                  | Length of each valid Time Slice asked about, buckets from a minute to the whole Data Period |
+
+- `route` is the route template, such as `/api/v1/trades/best`, so it has one value per route however clients write the URL. Requests no route answered (404s, Swagger UI) get `route="unmatched"`.
+- `/healthz`, `/readyz` and `/metrics` are not counted.
+- The search buckets stop at 10 ms on purpose: the search takes about 15–40 µs and the plain loop it replaced about 6 ms (ADR-0002), so a slower node or a regression to that loop shows.
+- The Node.js process metrics come from prom-client's defaults: CPU, memory, heap, event-loop lag, garbage collection, open handles.
+- Requests rejected by the rate limit (429) never reach the API; Traefik counts them in `traefik_router_requests_total`.
+
+## Logs
+
+The API logs one JSON line per request with pino (probes and scrapes are left out): `info` for 2xx and 3xx, `warn` for 4xx, `error` for 5xx.
