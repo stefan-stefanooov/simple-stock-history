@@ -60,6 +60,62 @@ flowchart LR
 
 **In one sentence:** the segment tree wins on raw speed, but hour summaries are already ~210× faster than the plain loop and well inside the budget, at 0.1% extra memory, so the last 15 µs aren't worth 83 MB.
 
+## Scaling to a huge history: stack the summaries
+
+Today the Data Period is one month: 720 hour summaries. A query joins every whole hour in its Time Slice, so its cost grows with the length of the history: a 100-year history would mean 876,000 joins and about 7.5 ms per query, over the budget.
+
+The fix is the same join one level up. The join works on **any two adjacent pieces, whatever their size**, so summaries can summarize summaries:
+
+```text
+Price Points  ──3,600──▶  hour summary  ──24──▶  day summary  ──30──▶  30-day block summary
+```
+
+Each level is built once, at image build, by joining the level below, and is pinned by sha256 like the hour summaries. The blocks have a fixed length (30 days, not calendar months), so finding the block of a second is still a single division.
+
+A query walks **up** the left edge, **across** the top and **down** the right edge, joining in time order:
+
+```text
+Time Slice      |◀─────────────────────────────────────────────────────────▶|
+30-day blocks                  [  block  ][  block  ][  block  ]
+days                  [d][d][d]                                 [d][d]
+hours           [h][h]                                                [h][h]
+Price Points  ::                                                            ::
+```
+
+| Level                  | Per query, worst case                  |
+| ---------------------- | -------------------------------------- |
+| Price Points           | ≤ 3,599 at each end (the partial hour) |
+| Hour summaries         | ≤ 23 at each end (the partial day)     |
+| Day summaries          | ≤ 29 at each end (the partial block)   |
+| 30-day block summaries | every whole block in between           |
+
+Every level but the top costs a fixed amount, however long the history is; only the top level grows. Adding a level whenever the top one gets long keeps the worst case almost flat:
+
+![Worst-case query vs history length](scaling-query-time.svg)
+
+| History   | Hours (today)             | Hours + days          | Hours + days + 30-day blocks |
+| --------- | ------------------------- | --------------------- | ---------------------------- |
+| 1 month   | 718 joins, 15 µs          | 74 joins, 10 µs       | (no whole block)             |
+| 1 year    | 8,758 joins, 84 µs        | 409 joins, 13 µs      | 115 joins, 10 µs             |
+| 10 years  | 87,598 joins, 0.76 ms     | 3,694 joins, 41 µs    | 224 joins, 11 µs             |
+| 100 years | 875,998 joins, **7.5 ms** | 36,544 joins, 0.32 ms | 1,319 joins, **20 µs**       |
+
+### Memory becomes the limit first
+
+![Memory vs history length](scaling-memory.svg)
+
+The Price History costs 4 bytes a second: past about two years it no longer fits the api pod's 256 MiB, and at 100 years (12.6 GB) it barely fits the whole node. All summary levels together stay tiny: 14.6 MB at 100 years.
+
+So at that scale:
+
+- **Keep every summary level in memory**, and the Price Points **on disk**.
+- **Read only the two partial hours per query**: two reads of at most 14.4 KB, at a known offset (position × 4 bytes) in the same Int32 file.
+- To shrink those reads further, add a **minute level** under the hours: then at most 59 Price Points are read at each end. Minute summaries for 100 years take about 840 MB, though, so they would live on disk as well.
+
+The segment tree is this idea taken to the extreme: a level for every factor of 2, starting from single seconds. That is why it needs 8× the data's memory. Large steps between levels (3,600, 24, 30) keep the summaries about 0.1% of the data's size.
+
+The times above are estimates, not measurements: they use the measured cost of about 1.24 ns per Price Point looped over and 8.6 ns per join, and leave out disk reads.
+
 ## How this was measured
 
 - Measured once, on 2 November 2026, on the real Price History: Node 24.21, Intel Core Ultra 5 325. Times are medians of many runs after warm-up.
