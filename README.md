@@ -14,14 +14,7 @@ Finds the **Best Trade** for the fictional Share `ACME`: given a Time Slice of i
 
 ## How it works
 
-```mermaid
-flowchart LR
-  U[Browser] --> T[Traefik<br/>TLS, rate limit]
-  T -- "/" --> W[web<br/>React on nginx]
-  T -- "/api" --> A[api<br/>NestJS]
-  A --> P[(Price History<br/>in memory, ~10 MB)]
-  M[Prometheus, Loki,<br/>Grafana] -. metrics, logs .-> A
-```
+![Architecture: Browser to Traefik on the homelab k3s cluster, which routes / to web and /api to the NestJS api holding the Price History and hour summaries in memory; Prometheus, Loki and Grafana watch it; releases go from GitHub Actions to GHCR, and Argo CD deploys the tags pinned in the homelab repo](docs/architecture.svg)
 
 - **Data:** generated from a seed while the api image builds, pinned by sha256, and held in memory. No database. [ADR-0001](docs/adr/0001-price-history-generated-at-build.md)
 - **Search:** hour summaries answer any Time Slice, even the whole month, in about 15 µs. [how it works](docs/best-trade-search.md), [ADR-0002](docs/adr/0002-best-trade-search-uses-hour-summaries.md), [alternatives with measurements](docs/best-trade-alternatives/README.md)

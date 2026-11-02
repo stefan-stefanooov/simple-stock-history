@@ -1,0 +1,156 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-label="Architecture: a browser reaches Traefik on the homelab k3s cluster, which routes / to the web app and /api to the NestJS api holding the Price History and hour summaries in memory. Prometheus scrapes the api, Alloy ships its logs to Loki, Grafana shows both. Releases are built by GitHub Actions, pushed to GHCR, pinned in the homelab repo and synced by Argo CD.">
+  <defs>
+    <marker id="a-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#0969da"/></marker>
+    <marker id="a-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#8250df"/></marker>
+    <marker id="a-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#57606a"/></marker>
+    <marker id="a-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#bc4c00"/></marker>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="120%"><feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#1f2328" flood-opacity="0.12"/></filter>
+  </defs>
+  <style>
+    text { font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1f2328; }
+    .name { font-size: 15px; font-weight: 600; }
+    .sub { font-size: 12px; fill: #57606a; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11.5px; fill: #57606a; }
+    .zone { font-size: 13px; font-weight: 600; fill: #57606a; }
+    .ns { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11.5px; fill: #6e7781; }
+    .label { font-size: 11px; font-weight: 500; }
+    .box { fill: #ffffff; stroke-width: 1.5; filter: url(#shadow); }
+  </style>
+
+  <rect width="1200" height="680" rx="12" fill="#ffffff" stroke="#d0d7de"/>
+
+  <!-- Browser -->
+  <rect class="box" x="28" y="180" width="160" height="80" rx="8" stroke="#0969da"/>
+  <rect x="28" y="180" width="5" height="80" rx="2" fill="#0969da"/>
+  <text class="name" x="48" y="212">Browser</text>
+  <text class="mono" x="48" y="234">https://stocks.lan</text>
+
+  <!-- Cluster -->
+  <rect x="228" y="20" width="948" height="478" rx="14" fill="#f6f8fa" stroke="#d0d7de"/>
+  <text class="zone" x="248" y="44">k3s cluster · <tspan font-weight="400">single node, homelab</tspan></text>
+
+  <!-- Traefik -->
+  <rect class="box" x="248" y="150" width="180" height="140" rx="8" stroke="#0969da"/>
+  <rect x="248" y="150" width="5" height="140" rx="2" fill="#0969da"/>
+  <text class="name" x="268" y="178">Traefik</text>
+  <text class="sub" x="268" y="198">ingress · 192.168.8.250</text>
+  <text class="sub" x="268" y="226">TLS from homelab-ca</text>
+  <text class="sub" x="268" y="246">HSTS</text>
+  <text class="sub" x="268" y="266">/api: 60 req/min per IP</text>
+
+  <!-- namespace stock-history -->
+  <rect x="470" y="60" width="400" height="300" rx="10" fill="#ffffff" fill-opacity="0.6" stroke="#8c959f" stroke-dasharray="5 4"/>
+  <text class="ns" x="486" y="82">namespace stock-history</text>
+
+  <rect class="box" x="490" y="96" width="360" height="62" rx="8" stroke="#1a7f37"/>
+  <rect x="490" y="96" width="5" height="62" rx="2" fill="#1a7f37"/>
+  <text class="name" x="510" y="122">web</text>
+  <text class="sub" x="510" y="143">React SPA served by nginx · port 8080</text>
+
+  <rect class="box" x="490" y="176" width="360" height="166" rx="8" stroke="#1a7f37"/>
+  <rect x="490" y="176" width="5" height="166" rx="2" fill="#1a7f37"/>
+  <text class="name" x="510" y="202">api</text>
+  <text class="sub" x="510" y="222">NestJS · port 3000 · <tspan class="mono">/healthz /readyz /metrics</tspan></text>
+
+  <rect x="510" y="240" width="160" height="86" rx="6" fill="#fff8c5" stroke="#d4a72c"/>
+  <text class="name" x="524" y="264" font-size="13">Price History</text>
+  <text class="sub" x="524" y="284">2,592,000 Price Points</text>
+  <text class="sub" x="524" y="302">~10 MB, in memory</text>
+
+  <rect x="680" y="240" width="154" height="86" rx="6" fill="#fff8c5" stroke="#d4a72c"/>
+  <text class="name" x="694" y="264" font-size="13">Hour summaries</text>
+  <text class="sub" x="694" y="284">720 hours · 11.5 KB</text>
+  <text class="sub" x="694" y="302">any Time Slice ~15 µs</text>
+
+  <!-- namespace monitoring -->
+  <rect x="930" y="60" width="226" height="300" rx="10" fill="#ffffff" fill-opacity="0.6" stroke="#8c959f" stroke-dasharray="5 4"/>
+  <text class="ns" x="946" y="82">namespace monitoring</text>
+
+  <rect class="box" x="946" y="94" width="180" height="56" rx="8" stroke="#8250df"/>
+  <rect x="946" y="94" width="5" height="56" rx="2" fill="#8250df"/>
+  <text class="name" x="964" y="118">Grafana</text>
+  <text class="sub" x="964" y="137">dashboard · alerts</text>
+
+  <rect class="box" x="946" y="180" width="180" height="56" rx="8" stroke="#8250df"/>
+  <rect x="946" y="180" width="5" height="56" rx="2" fill="#8250df"/>
+  <text class="name" x="964" y="204">Prometheus</text>
+  <text class="sub" x="964" y="223">metrics, every 30 s</text>
+
+  <rect class="box" x="946" y="268" width="180" height="56" rx="8" stroke="#8250df"/>
+  <rect x="946" y="268" width="5" height="56" rx="2" fill="#8250df"/>
+  <text class="name" x="964" y="292">Loki</text>
+  <text class="sub" x="964" y="311">logs via Alloy, 7 days</text>
+
+  <!-- Argo CD -->
+  <rect class="box" x="740" y="400" width="170" height="68" rx="8" stroke="#bc4c00"/>
+  <rect x="740" y="400" width="5" height="68" rx="2" fill="#bc4c00"/>
+  <text class="name" x="760" y="426">Argo CD</text>
+  <text class="sub" x="760" y="447">syncs homelab main</text>
+
+  <!-- Request path -->
+  <path d="M188 220 H244" fill="none" stroke="#0969da" stroke-width="1.75" marker-end="url(#a-blue)"/>
+  <text class="label" x="216" y="212" text-anchor="middle" fill="#0969da">HTTPS</text>
+  <path d="M428 190 H452 V127 H486" fill="none" stroke="#0969da" stroke-width="1.75" marker-end="url(#a-blue)"/>
+  <text class="label" x="442" y="162" text-anchor="middle" fill="#0969da">/</text>
+  <path d="M428 259 H486" fill="none" stroke="#0969da" stroke-width="1.75" marker-end="url(#a-blue)"/>
+  <text class="label" x="449" y="251" text-anchor="middle" fill="#0969da">/api</text>
+
+  <!-- Telemetry -->
+  <path d="M944 208 H854" fill="none" stroke="#8250df" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#a-purple)"/>
+  <text class="label" x="900" y="200" text-anchor="middle" fill="#8250df">scrape</text>
+  <path d="M852 296 H942" fill="none" stroke="#8250df" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#a-purple)"/>
+  <text class="label" x="900" y="288" text-anchor="middle" fill="#8250df">logs</text>
+  <path d="M1036 180 V154" fill="none" stroke="#8250df" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#a-purple)"/>
+  <path d="M1126 296 H1142 V122 H1130" fill="none" stroke="#8250df" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#a-purple)"/>
+
+  <!-- Delivery lane -->
+  <text class="zone" x="28" y="540">Delivery</text>
+
+  <rect class="box" x="28" y="556" width="170" height="84" rx="8" stroke="#57606a"/>
+  <rect x="28" y="556" width="5" height="84" rx="2" fill="#57606a"/>
+  <text class="name" x="48" y="582">This repo</text>
+  <text class="sub" x="48" y="602">GitHub · main</text>
+  <text class="mono" x="48" y="622">tag vX.Y.Z</text>
+
+  <rect class="box" x="238" y="556" width="232" height="84" rx="8" stroke="#57606a"/>
+  <rect x="238" y="556" width="5" height="84" rx="2" fill="#57606a"/>
+  <text class="name" x="258" y="582">Release workflow</text>
+  <text class="sub" x="258" y="602">GitHub Actions, linux/amd64</text>
+  <text class="sub" x="258" y="622">generates data, checks sha256</text>
+
+  <rect class="box" x="510" y="556" width="190" height="84" rx="8" stroke="#57606a"/>
+  <rect x="510" y="556" width="5" height="84" rx="2" fill="#57606a"/>
+  <text class="name" x="530" y="582">GHCR</text>
+  <text class="mono" x="530" y="602">stock-history-api:X.Y.Z</text>
+  <text class="mono" x="530" y="620">stock-history-web:X.Y.Z</text>
+
+  <rect class="box" x="740" y="556" width="170" height="84" rx="8" stroke="#bc4c00"/>
+  <rect x="740" y="556" width="5" height="84" rx="2" fill="#bc4c00"/>
+  <text class="name" x="760" y="582">homelab repo</text>
+  <text class="sub" x="760" y="602">manifests, pinned</text>
+  <text class="sub" x="760" y="620">image tags</text>
+
+  <path d="M198 598 H234" fill="none" stroke="#57606a" stroke-width="1.5" marker-end="url(#a-gray)"/>
+  <path d="M470 598 H506" fill="none" stroke="#57606a" stroke-width="1.5" marker-end="url(#a-gray)"/>
+  <text class="label" x="488" y="590" text-anchor="middle" fill="#57606a">push</text>
+  <path d="M700 598 H736" fill="none" stroke="#57606a" stroke-width="1.5" marker-end="url(#a-gray)"/>
+  <text class="label" x="718" y="590" text-anchor="middle" fill="#57606a">PR</text>
+  <path d="M600 556 V364" fill="none" stroke="#57606a" stroke-width="1.5" marker-end="url(#a-gray)"/>
+  <text class="label" x="610" y="430" fill="#57606a">pull images</text>
+  <path d="M825 556 V472" fill="none" stroke="#bc4c00" stroke-width="1.5" marker-end="url(#a-orange)"/>
+  <path d="M825 400 V364" fill="none" stroke="#bc4c00" stroke-width="1.5" marker-end="url(#a-orange)"/>
+  <text class="label" x="835" y="386" fill="#bc4c00">apply</text>
+
+  <!-- Legend -->
+  <g transform="translate(950 552)">
+    <text class="zone" x="0" y="0" font-size="12">Legend</text>
+    <path d="M0 18 H34" stroke="#0969da" stroke-width="1.75" marker-end="url(#a-blue)"/>
+    <text class="sub" x="44" y="22">request</text>
+    <path d="M0 38 H34" stroke="#8250df" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#a-purple)"/>
+    <text class="sub" x="44" y="42">telemetry</text>
+    <path d="M0 58 H34" stroke="#57606a" stroke-width="1.5" marker-end="url(#a-gray)"/>
+    <text class="sub" x="44" y="62">release</text>
+    <path d="M0 78 H34" stroke="#bc4c00" stroke-width="1.5" marker-end="url(#a-orange)"/>
+    <text class="sub" x="44" y="82">deploy (GitOps)</text>
+  </g>
+</svg>
