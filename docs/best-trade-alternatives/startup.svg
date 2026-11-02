@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="238" viewBox="0 0 820 238" font-family="system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="410" y="28" text-anchor="middle" font-size="17" font-weight="600" fill="#222">Work done per pod at startup</text>
+<text x="410" y="50" text-anchor="middle" font-size="12" fill="#555">reading and hashing the Price History is paid by every option</text>
+<text x="270" y="88" text-anchor="end" font-size="13" fill="#222" font-weight="600">Summaries baked in image (chosen)</text><rect x="280" y="70" width="39.61594112998109" height="26" fill="#b0b0b0" rx="2"/><text x="327.6159411299811" y="88" font-size="13" fill="#222" font-weight="600">14 ms</text>
+<text x="270" y="134" text-anchor="end" font-size="13" fill="#222">Summaries built at startup</text><rect x="280" y="116" width="39.61594112998109" height="26" fill="#b0b0b0" rx="2"/><rect x="319.6159411299811" y="116" width="14.207348907780847" height="26" fill="#2ca02c" rx="2"/><text x="341.8232900377619" y="134" font-size="13" fill="#222">19 ms</text>
+<text x="270" y="180" text-anchor="end" font-size="13" fill="#222">Segment tree built at startup</text><rect x="280" y="162" width="39.61594112998109" height="26" fill="#b0b0b0" rx="2"/><rect x="319.6159411299811" y="162" width="370.3840588700189" height="26" fill="#1f77b4" rx="2"/><text x="698" y="180" font-size="13" fill="#222">145 ms</text>
+<line x1="280" x2="280" y1="62" y2="196" stroke="#999"/><text x="280" y="230" font-size="11" fill="#777">linear scale, ms</text>
+</svg>
