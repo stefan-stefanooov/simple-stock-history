@@ -51,20 +51,21 @@ files are not used and are not bumped.
 
 6. Deploy: open a PR in the
    [homelab repo](https://github.com/stefan-stefanooov/homelab) that bumps
-   both image tags to `X.Y.Z`. Merging it to homelab `main` is the deploy:
+   both image tags to `X.Y.Z` (in `workloads/stock-history/api.yaml` and
+   `web.yaml`). Merging it to homelab `main` is the deploy:
    Argo CD syncs it right away. Then check that the Application is Synced and
    Healthy: `kubectl -n argocd get applications`.
 
-## First release only: make the packages public
+## The packages are public
 
-GHCR creates both packages as private on their first push. The homelab pulls
-without credentials, so the owner makes each one public once:
+The homelab pulls without credentials, so both packages must stay public. They
+were public from the first push (`v0.1.0`); no setting needed changing. To check,
+pull anonymously as in step 5 after `docker logout ghcr.io`. If a pull ever asks
+for credentials, the owner sets the package back to public under **Danger Zone**
+→ **Change visibility** in its settings:
 
-1. Open the package settings:
-   - <https://github.com/users/stefan-stefanooov/packages/container/stock-history-api/settings>
-   - <https://github.com/users/stefan-stefanooov/packages/container/stock-history-web/settings>
-2. Under **Danger Zone**, choose **Change visibility** → **Public**.
-3. Check that an anonymous pull works: `docker logout ghcr.io`, then pull as in step 5.
+- <https://github.com/users/stefan-stefanooov/packages/container/stock-history-api/settings>
+- <https://github.com/users/stefan-stefanooov/packages/container/stock-history-web/settings>
 
 ## When something goes wrong
 
