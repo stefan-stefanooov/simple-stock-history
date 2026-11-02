@@ -144,7 +144,7 @@ describe('Swagger docs, SWAGGER_ENABLED=true', () => {
 
   it('serves Swagger UI under the same Content-Security-Policy as the rest of the API', async () => {
     const docs = await request(app.getHttpServer()).get('/api/docs');
-    const api = await request(app.getHttpServer()).get('/api');
+    const api = await request(app.getHttpServer()).get('/api/hello');
 
     expect(docs.headers['content-security-policy']).toBe(
       api.headers['content-security-policy'],
@@ -381,7 +381,7 @@ describe('Swagger docs, SWAGGER_ENABLED=false', () => {
   });
 
   it('still serves the API', async () => {
-    const response = await request(app.getHttpServer()).get('/api');
+    const response = await request(app.getHttpServer()).get('/api/hello');
 
     expect(response.status).toBe(200);
   });

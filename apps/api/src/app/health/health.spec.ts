@@ -135,7 +135,7 @@ describe('Kubernetes probes', () => {
   );
 
   it('keeps the other routes under /api', async () => {
-    const response = await request(app.getHttpServer()).get('/api');
+    const response = await request(app.getHttpServer()).get('/api/hello');
 
     expect(response.status).toBe(200);
   });
@@ -145,8 +145,8 @@ describe('Kubernetes probes', () => {
     await request(app.getHttpServer()).get('/readyz?verbose=1');
     // Request logs are written in order, so once this one is in, any probe
     // log line would be too.
-    await request(app.getHttpServer()).get('/api?after=probes');
-    await waitForRequestLog('/api?after=probes');
+    await request(app.getHttpServer()).get('/api/hello?after=probes');
+    await waitForRequestLog('/api/hello?after=probes');
 
     const loggedUrls = requestLogs().map(
       (line) => (line['req'] as LogLine)['url'],
@@ -154,6 +154,6 @@ describe('Kubernetes probes', () => {
     expect(loggedUrls).not.toContainEqual(
       expect.stringMatching(/^\/(healthz|readyz)/),
     );
-    expect(loggedUrls).toContain('/api?after=probes');
+    expect(loggedUrls).toContain('/api/hello?after=probes');
   });
 });
