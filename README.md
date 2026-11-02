@@ -57,15 +57,15 @@ Setup details, configuration, tests and container images: [Development](docs/dev
 
 ### Assignment and design
 
-| Doc                                                                      | Read it for                                                         |
-| ------------------------------------------------------------------------ | ------------------------------------------------------------------- |
-| [ASSIGNMENT.md](ASSIGNMENT.md)                                           | The assignment this answers                                         |
-| [GLOSSARY.md](GLOSSARY.md)                                               | The domain words (Share, Time Slice, Best Trade, ...), used exactly |
-| [#2](https://github.com/stefan-stefanooov/simple-stock-history/issues/2) | The agreed design and the issue tree the work follows               |
-| [docs/adr](docs/adr)                                                     | The decisions behind the design                                     |
-| [How the Best Trade search works](docs/best-trade-search.md)             | The algorithm step by step, with a worked example                   |
-| [Best Trade search alternatives](docs/best-trade-alternatives/README.md) | The options measured against each other, with charts                |
-| [API](docs/api.md)                                                       | Routes, errors, caching, health and metrics endpoints               |
+| Doc                                                                                                 | Read it for                                                                                                                                                                   |
+| --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [ASSIGNMENT.md](ASSIGNMENT.md)                                                                      | The assignment this answers                                                                                                                                                   |
+| [GLOSSARY.md](GLOSSARY.md)                                                                          | The domain words (Share, Time Slice, Best Trade, ...), used exactly                                                                                                           |
+| [#2 Build Simple Stock History](https://github.com/stefan-stefanooov/simple-stock-history/issues/2) | The main issue: the agreed design (domain, data, API, web UI, deployment and monitoring). Its sub-issues are the epics, and each epic's sub-issues are the tasks, one PR each |
+| [docs/adr](docs/adr)                                                                                | The decisions behind the design                                                                                                                                               |
+| [How the Best Trade search works](docs/best-trade-search.md)                                        | The algorithm step by step, with a worked example                                                                                                                             |
+| [Best Trade search alternatives](docs/best-trade-alternatives/README.md)                            | The options measured against each other, with charts                                                                                                                          |
+| [API](docs/api.md)                                                                                  | Routes, errors, caching, health and metrics endpoints                                                                                                                         |
 
 ### Development and deployment
 
