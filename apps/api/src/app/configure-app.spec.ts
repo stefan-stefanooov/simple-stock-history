@@ -224,7 +224,9 @@ describe('graceful shutdown', () => {
     EventEmitter.prototype.emit.call(process, 'SIGTERM');
 
     await eventually(() => !app?.getHttpServer().listening);
-    await expect(request(url).get('/api/hello')).rejects.toThrow(/ECONNREFUSED/);
+    await expect(request(url).get('/api/hello')).rejects.toThrow(
+      /ECONNREFUSED/,
+    );
     expect(exit).not.toHaveBeenCalled();
 
     releaseSlowRequest.fire();
