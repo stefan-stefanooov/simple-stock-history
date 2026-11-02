@@ -62,17 +62,7 @@ flowchart LR
 
 ## How this was measured
 
-- Real Price History (`data/acme-2025-11.bin`), Node 24.21, Intel Core Ultra 5 325. Times are medians of many runs after warm-up.
+- Measured once, on 2 November 2026, on the real Price History: Node 24.21, Intel Core Ultra 5 325. Times are medians of many runs after warm-up.
 - Each Time Slice starts at position 1, so the first hour is partial, as in the worst case. "30 days" is positions 1 to 2,591,998: two almost-whole partial hours plus 718 summaries.
 - All four searches returned the same Best Trade for every Time Slice before they were timed.
 - The ADR's numbers come from an older dev machine (plain loop 6–10 ms, chosen option ~0.035 ms, segment tree ~1 µs). The ratios are similar; the lab node is slower than both.
-
-To measure again and redraw the charts:
-
-```sh
-pnpm nx run price-history-generator:generate
-node --max-old-space-size=2048 libs/best-trade/bench/alternatives.ts > /tmp/alternatives.json
-node libs/best-trade/bench/alternatives-charts.mjs /tmp/alternatives.json docs/best-trade-alternatives
-```
-
-[`alternatives.ts`](../../libs/best-trade/bench/alternatives.ts) implements every option, checks each against the plain loop and prints JSON; [`alternatives-charts.mjs`](../../libs/best-trade/bench/alternatives-charts.mjs) turns it into these SVGs. The chosen option alone has its own benchmark, [`worst-case-time-slice.ts`](../../libs/best-trade/bench/worst-case-time-slice.ts).
