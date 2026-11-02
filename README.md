@@ -24,7 +24,7 @@ flowchart LR
 ```
 
 - **Data:** generated from a seed while the api image builds, pinned by sha256, and held in memory. No database. [ADR-0001](docs/adr/0001-price-history-generated-at-build.md)
-- **Search:** hour summaries answer any Time Slice, even the whole month, in about 15 µs. [ADR-0002](docs/adr/0002-best-trade-search-uses-hour-summaries.md), [alternatives with measurements](docs/best-trade-alternatives/README.md)
+- **Search:** hour summaries answer any Time Slice, even the whole month, in about 15 µs. [how it works](docs/best-trade-search.md), [ADR-0002](docs/adr/0002-best-trade-search-uses-hour-summaries.md), [alternatives with measurements](docs/best-trade-alternatives/README.md)
 - **API:** `GET /api/v1/period` and `GET /api/v1/trades/best?from=&to=`; errors are RFC 9457 problem+json. [API](docs/api.md)
 - **Web:** Time Slice picker to the second (UTC), Available Funds, and the result in whole shares and USD, worked out in the browser.
 - **Runs on:** the homelab k3s cluster, deployed by Argo CD, watched in Grafana. [Operations](docs/operations.md)
@@ -61,6 +61,7 @@ Setup details, configuration, tests and container images: [Development](docs/dev
 | [GLOSSARY.md](GLOSSARY.md)                                               | The domain words (Share, Time Slice, Best Trade, ...), used exactly |
 | [#2](https://github.com/stefan-stefanooov/simple-stock-history/issues/2) | The agreed design and the issue tree the work follows               |
 | [docs/adr](docs/adr)                                                     | The decisions behind the design                                     |
+| [How the Best Trade search works](docs/best-trade-search.md)             | The algorithm step by step, with a worked example                   |
 | [Best Trade search alternatives](docs/best-trade-alternatives/README.md) | The options measured against each other, with charts                |
 | [Development](docs/development.md)                                       | Setup, running, configuration, tests, CI, container images          |
 | [API](docs/api.md)                                                       | Routes, errors, caching, health and metrics endpoints               |
