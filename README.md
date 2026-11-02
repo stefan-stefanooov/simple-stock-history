@@ -1,3 +1,5 @@
+![simple-stock-history: a terminal showing the Best Trade for ACME in November 2025](docs/logo.svg)
+
 # simple-stock-history
 
 [![CI](https://github.com/stefan-stefanooov/simple-stock-history/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/stefan-stefanooov/simple-stock-history/actions/workflows/ci.yml)
