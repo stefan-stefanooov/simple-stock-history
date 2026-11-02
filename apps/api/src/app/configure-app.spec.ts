@@ -97,7 +97,7 @@ describe('configureApp', () => {
   });
 
   it('sets helmet security headers', async () => {
-    const response = await request(app.getHttpServer()).get('/api');
+    const response = await request(app.getHttpServer()).get('/api/hello');
 
     expect(response.headers).toMatchObject({
       'content-security-policy': expect.any(String),
@@ -116,23 +116,23 @@ describe('configureApp', () => {
   });
 
   it('leaves Strict-Transport-Security to Traefik (homelab#6)', async () => {
-    const response = await request(app.getHttpServer()).get('/api');
+    const response = await request(app.getHttpServer()).get('/api/hello');
 
     expect(response.headers['strict-transport-security']).toBeUndefined();
   });
 
   it('logs each request as a JSON line with the client IP from X-Forwarded-For', async () => {
     await request(app.getHttpServer())
-      .get('/api?from=1')
+      .get('/api/hello?from=1')
       .set('X-Forwarded-For', '203.0.113.7')
       .set('User-Agent', 'jest');
 
-    expect(await requestLogFor('/api?from=1')).toMatchObject({
+    expect(await requestLogFor('/api/hello?from=1')).toMatchObject({
       level: 'info',
       time: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
       req: {
         method: 'GET',
-        url: '/api?from=1',
+        url: '/api/hello?from=1',
         remoteAddress: '203.0.113.7',
         userAgent: 'jest',
       },
@@ -143,10 +143,10 @@ describe('configureApp', () => {
 
   it('takes the client IP from the address Traefik appended, not from addresses the client sent', async () => {
     await request(app.getHttpServer())
-      .get('/api?from=2')
+      .get('/api/hello?from=2')
       .set('X-Forwarded-For', '198.51.100.1, 203.0.113.8');
 
-    expect(await requestLogFor('/api?from=2')).toMatchObject({
+    expect(await requestLogFor('/api/hello?from=2')).toMatchObject({
       req: { remoteAddress: '203.0.113.8' },
     });
   });
@@ -224,7 +224,9 @@ describe('graceful shutdown', () => {
     EventEmitter.prototype.emit.call(process, 'SIGTERM');
 
     await eventually(() => !app?.getHttpServer().listening);
-    await expect(request(url).get('/api')).rejects.toThrow(/ECONNREFUSED/);
+    await expect(request(url).get('/api/hello')).rejects.toThrow(
+      /ECONNREFUSED/,
+    );
     expect(exit).not.toHaveBeenCalled();
 
     releaseSlowRequest.fire();
