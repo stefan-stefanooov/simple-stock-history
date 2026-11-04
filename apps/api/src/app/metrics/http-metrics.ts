@@ -13,6 +13,15 @@ import type { ExpressRequest } from './express-request.interface';
 type HttpLabel = 'method' | 'route' | 'status_code';
 
 /**
+ * prom-client's default buckets (5 ms to 10 s) plus 1 ms and 2.5 ms: most
+ * requests take 1-4 ms, so with the defaults every p95 reads as "under 5 ms".
+ * 0.5 stays: the homelab's latency alert fires at a p95 above 500 ms.
+ */
+const DURATION_BUCKETS = [
+  0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10,
+];
+
+/**
  * The `route` label of requests no controller route answered: 404s for
  * unknown paths, and Swagger UI, which serves itself outside the controllers.
  */
@@ -61,6 +70,7 @@ export class HttpMetrics {
       name: 'http_request_duration_seconds',
       help: 'Time from receiving an HTTP request to sending its response, by method, route template and status code.',
       labelNames,
+      buckets: DURATION_BUCKETS,
       registers: [registry],
     });
   }

@@ -148,6 +148,21 @@ describe('GET /metrics', () => {
     ).toBe(1);
   });
 
+  it.each(['0.001', '0.0025', '0.005', '0.5', '10'])(
+    'times requests with a %s second bucket',
+    (le) => {
+      // Requests take a few ms, so the buckets start at 1 ms; the latency
+      // alert's 500 ms threshold needs its own bucket to stay exact.
+      expect(
+        sampleOf(scrape.text, 'http_request_duration_seconds_bucket', {
+          route: BEST_TRADE_ROUTE,
+          status_code: '200',
+          le,
+        }),
+      ).toBeDefined();
+    },
+  );
+
   it('labels requests no route answered as unmatched, not by their URL', () => {
     expect(
       sampleOf(scrape.text, 'http_requests_total', {
