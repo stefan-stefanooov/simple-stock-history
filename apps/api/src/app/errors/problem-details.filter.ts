@@ -14,6 +14,7 @@ import {
 import { ZodValidationException } from 'nestjs-zod';
 import { STATUS_CODES } from 'node:http';
 import { z } from 'zod';
+import { logProblem } from '../logging/logged-problem';
 import {
   INVALID_REQUEST_DETAIL,
   InvalidRequestException,
@@ -42,7 +43,8 @@ type Problem = Pick<ProblemDetails, 'status' | 'detail' | 'issues'>;
  *   the log only, never into the response.
  *
  * Every 500 is logged with its error, since it means something broke; a
- * deliberate 503 is not. Error responses are never cached, whatever
+ * deliberate 503 is not. The request's own log line gets the `detail` and
+ * `issues` sent, so it says why the request failed. Error responses are never cached, whatever
  * `Cache-Control` the route sets for its successful responses.
  */
 @Catch()
@@ -78,6 +80,7 @@ export class ProblemDetailsFilter implements ExceptionFilter {
       instance: httpAdapter.getRequestUrl(http.getRequest()),
       issues: problem.issues,
     };
+    logProblem(response, { detail: body.detail, issues: body.issues });
     httpAdapter.setHeader(response, 'Content-Type', PROBLEM_JSON_MEDIA_TYPE);
     httpAdapter.setHeader(response, 'Cache-Control', 'no-store');
     // Sent as a string: for an object body the adapter would reset any
