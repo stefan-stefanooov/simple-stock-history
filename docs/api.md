@@ -26,7 +26,7 @@ Outside `/api`, for the cluster only (Traefik routes only `/api` to the API, so 
 | Metric                                 | Type      | Labels                           | Measures                                                                                    |
 | -------------------------------------- | --------- | -------------------------------- | ------------------------------------------------------------------------------------------- |
 | `http_requests_total`                  | counter   | `method`, `route`, `status_code` | Requests answered. Errors are the 4xx and 5xx values of `status_code`                       |
-| `http_request_duration_seconds`        | histogram | `method`, `route`, `status_code` | Time from receiving a request to sending its response                                       |
+| `http_request_duration_seconds`        | histogram | `method`, `route`, `status_code` | Time from receiving a request to sending its response, buckets from 1 ms to 10 s            |
 | `best_trade_search_duration_seconds`   | histogram |                                  | Time the Best Trade search takes for one Time Slice, buckets from 5 µs to 10 ms             |
 | `best_trade_time_slice_length_seconds` | histogram |                                  | Length of each valid Time Slice asked about, buckets from a minute to the whole Data Period |
 
