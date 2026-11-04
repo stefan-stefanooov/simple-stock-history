@@ -308,6 +308,67 @@ describe('ErrorsModule', () => {
     });
   });
 
+  describe("the request's log line", () => {
+    /** The `res` of the request log line for `url`. */
+    async function loggedResponse(url: string): Promise<unknown> {
+      const isRequestLog = (line: LogLine) =>
+        (line.req as { url?: unknown } | undefined)?.url === url &&
+        line.msg === 'request completed';
+      await expectLogged({
+        req: expect.objectContaining({ url }),
+        msg: 'request completed',
+      });
+      return logLines.find(isRequestLog)?.res;
+    }
+
+    it('carries the detail and issues of a 400', async () => {
+      const url = '/api/test/time-slice?from=x';
+      await get(url);
+
+      expect(await loggedResponse(url)).toEqual({
+        statusCode: 400,
+        detail: INVALID_REQUEST_DETAIL,
+        issues: [
+          { path: ['from'], message: DIGITS_ONLY_MESSAGE },
+          { path: ['to'], message: 'Required' },
+        ],
+      });
+    });
+
+    it('carries the detail of an HttpException', async () => {
+      await get('/api/test/too-short');
+
+      expect(await loggedResponse('/api/test/too-short')).toEqual({
+        statusCode: 422,
+        detail: 'The Time Slice must be at least 2 seconds long',
+      });
+    });
+
+    it('carries the detail of an unknown route', async () => {
+      await get('/api/no-such-route?log=1');
+
+      expect(await loggedResponse('/api/no-such-route?log=1')).toEqual({
+        statusCode: 404,
+        detail: 'Cannot GET /api/no-such-route?log=1',
+      });
+    });
+
+    it('carries only the status of a problem without detail', async () => {
+      await get('/api/test/plain-not-found');
+
+      expect(await loggedResponse('/api/test/plain-not-found')).toEqual({
+        statusCode: 404,
+      });
+    });
+
+    it('carries only the status of a success', async () => {
+      const url = '/api/test/time-slice?from=1761955200&to=1762041599';
+      await get(url);
+
+      expect(await loggedResponse(url)).toEqual({ statusCode: 200 });
+    });
+  });
+
   describe('unexpected errors', () => {
     it('answers with 500 and nothing about the error itself', async () => {
       const response = await get('/api/test/crash');

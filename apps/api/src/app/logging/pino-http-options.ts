@@ -3,6 +3,7 @@ import { type LevelWithSilent, stdTimeFunctions } from 'pino';
 import type { Options } from 'pino-http';
 import type { AppConfig } from '../config/app-config.interface';
 import { isInternalRequest } from '../internal-routes';
+import { loggedProblemOf } from './logged-problem';
 import type { StdSerializedRequest } from './std-serialized-request.interface';
 
 /**
@@ -20,8 +21,20 @@ function serializeRequest(req: StdSerializedRequest) {
   };
 }
 
-function serializeResponse(res: { statusCode: number | null }) {
-  return { statusCode: res.statusCode };
+/**
+ * The status, plus the `detail` and `issues` of an error response, so the
+ * log line says why the request failed.
+ */
+function serializeResponse(res: {
+  statusCode: number | null;
+  raw: ServerResponse;
+}) {
+  const problem = loggedProblemOf(res.raw);
+  return {
+    statusCode: res.statusCode,
+    ...(problem?.detail !== undefined && { detail: problem.detail }),
+    ...(problem?.issues !== undefined && { issues: problem.issues }),
+  };
 }
 
 function requestLogLevel(
