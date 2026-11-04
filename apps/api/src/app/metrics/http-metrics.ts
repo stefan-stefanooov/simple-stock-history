@@ -8,6 +8,7 @@ import type { ServerResponse } from 'node:http';
 import { Counter, Histogram, Registry } from 'prom-client';
 import type { Observable } from 'rxjs';
 import { isInternalRequest } from '../internal-routes';
+import { SWAGGER_UI_PATH } from '../swagger/swagger';
 import type { ExpressRequest } from './express-request.interface';
 
 type HttpLabel = 'method' | 'route' | 'status_code';
@@ -21,11 +22,31 @@ const DURATION_BUCKETS = [
   0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10,
 ];
 
-/**
- * The `route` label of requests no controller route answered: 404s for
- * unknown paths, and Swagger UI, which serves itself outside the controllers.
- */
+/** The `route` label of requests nothing answered: 404s for unknown paths. */
 export const UNMATCHED_ROUTE = 'unmatched';
+
+/** The `route` label of what Swagger UI serves, written like a route template. */
+export const SWAGGER_UI_ROUTE = `/${SWAGGER_UI_PATH}`;
+
+const NOT_FOUND = 404;
+
+/**
+ * The `route` label of a request no controller route answered. Swagger UI
+ * serves its page, files and the OpenAPI document outside the controllers,
+ * so what it answers is labelled with its path; a 404 under that path is
+ * unmatched like any other.
+ */
+function routeWithoutTemplate(
+  req: ExpressRequest,
+  res: ServerResponse,
+): string {
+  const path = (req.originalUrl ?? req.url ?? '').split('?')[0];
+  const isSwaggerUi =
+    path === SWAGGER_UI_ROUTE || path.startsWith(`${SWAGGER_UI_ROUTE}/`);
+  return isSwaggerUi && res.statusCode !== NOT_FOUND
+    ? SWAGGER_UI_ROUTE
+    : UNMATCHED_ROUTE;
+}
 
 /**
  * Leaves the route template of the controller route that answers a request,
@@ -91,7 +112,7 @@ export class HttpMetrics {
     res.once('finish', () => {
       const labels = {
         method: req.method ?? 'UNKNOWN',
-        route: req.metricsRouteTemplate ?? UNMATCHED_ROUTE,
+        route: req.metricsRouteTemplate ?? routeWithoutTemplate(req, res),
         status_code: String(res.statusCode),
       };
       this.requests.inc(labels);

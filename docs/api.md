@@ -30,7 +30,7 @@ Outside `/api`, for the cluster only (Traefik routes only `/api` to the API, so 
 | `best_trade_search_duration_seconds`   | histogram |                                  | Time the Best Trade search takes for one Time Slice, buckets from 5 µs to 10 ms             |
 | `best_trade_time_slice_length_seconds` | histogram |                                  | Length of each valid Time Slice asked about, buckets from a minute to the whole Data Period |
 
-- `route` is the route template, such as `/api/v1/trades/best`, so it has one value per route however clients write the URL. Requests no route answered (404s, Swagger UI) get `route="unmatched"`.
+- `route` is the route template, such as `/api/v1/trades/best`, so it has one value per route however clients write the URL. Swagger UI, which is served outside the routes, gets `route="/api/docs"` for its page, files and the OpenAPI document. Requests nothing answered (404s) get `route="unmatched"`.
 - `/healthz`, `/readyz` and `/metrics` are not counted.
 - The search buckets stop at 10 ms on purpose: the search takes about 15–40 µs and the plain loop it replaced about 6 ms (ADR-0002), so a slower node or a regression to that loop shows.
 - The Node.js process metrics come from prom-client's defaults: CPU, memory, heap, event-loop lag, garbage collection, open handles.

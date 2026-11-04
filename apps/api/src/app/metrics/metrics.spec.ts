@@ -10,7 +10,7 @@ import { AppModule } from '../app.module';
 import { loadConfig } from '../config/app-config';
 import { APP_CONFIG } from '../config/config.module';
 import { configureApp } from '../configure-app';
-import { UNMATCHED_ROUTE } from './http-metrics';
+import { SWAGGER_UI_ROUTE, UNMATCHED_ROUTE } from './http-metrics';
 
 const START = FIXTURE_DATA_PERIOD_START;
 const BEST_TRADE_ROUTE = '/api/v1/trades/best';
@@ -76,8 +76,8 @@ describe('GET /metrics', () => {
     const server = app.getHttpServer();
 
     // A Best Trade over the fixture's 11 seconds, a 400, two unknown paths,
-    // the internal routes and the OpenAPI document. Then the scrape the tests
-    // read.
+    // the internal routes, Swagger UI, a missing Swagger UI file and the
+    // OpenAPI document. Then the scrape the tests read.
     await request(server)
       .get(`${BEST_TRADE_ROUTE}?from=${START}&to=${START + 10}`)
       .expect(200);
@@ -89,6 +89,8 @@ describe('GET /metrics', () => {
     await request(server).get('/healthz').expect(200);
     await request(server).get('/readyz').expect(200);
     await request(server).get('/metrics').expect(200);
+    await request(server).get('/api/docs').expect(200);
+    await request(server).get('/api/docs/no-such-file.js').expect(404);
     const document = await request(server)
       .get('/api/docs/openapi.json')
       .expect(200);
@@ -169,8 +171,28 @@ describe('GET /metrics', () => {
         route: UNMATCHED_ROUTE,
         status_code: '404',
       }),
-    ).toBe(2);
+      // The two unknown paths and the missing Swagger UI file.
+    ).toBe(3);
     expect(scrape.text).not.toContain('nothing-here');
+  });
+
+  it('labels what Swagger UI serves with its path, not as unmatched', () => {
+    // The page and the OpenAPI document.
+    expect(
+      sampleOf(scrape.text, 'http_requests_total', {
+        route: SWAGGER_UI_ROUTE,
+        status_code: '200',
+      }),
+    ).toBe(2);
+  });
+
+  it('labels a missing Swagger UI file as unmatched, like any other 404', () => {
+    expect(
+      sampleOf(scrape.text, 'http_requests_total', {
+        route: SWAGGER_UI_ROUTE,
+        status_code: '404',
+      }),
+    ).toBeUndefined();
   });
 
   it('leaves the probes and the scrapes out of the HTTP metrics', () => {
